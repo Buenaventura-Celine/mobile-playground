@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:nfc_manager/nfc_manager.dart';
+import 'package:nfc_manager/platform_tags.dart';
 
 class NfcScreen extends StatefulWidget {
   const NfcScreen({super.key});
@@ -15,7 +16,7 @@ class NfcScreenState extends State<NfcScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Supratag NFC Scanner')),
+      appBar: AppBar(title: const Text('NFC Scanner')),
       body: SafeArea(
         child: FutureBuilder<bool>(
           future: NfcManager.instance.isAvailable(),
@@ -40,7 +41,7 @@ class NfcScreenState extends State<NfcScreen> {
                             if (data == null) {
                               return const Center(
                                 child: Text(
-                                  'Tap "Scan Supratag" to read an NFC tag',
+                                  'Tap "Scan tag" to read an NFC tag',
                                   style: TextStyle(fontSize: 16),
                                   textAlign: TextAlign.center,
                                 ),
@@ -53,8 +54,6 @@ class NfcScreenState extends State<NfcScreen> {
                                   _buildDataRow('Supratag ID', data['identifier']),
                                   const SizedBox(height: 8),
                                   _buildDataRow('NFC Tag ID', data['nfcTagId']),
-                                  const SizedBox(height: 8),
-                                  _buildDataRow('Scanned At', data['scannedAt']),
                                   const SizedBox(height: 8),
                                   _buildDataRow('Tag Type', data['tagType']),
                                   const SizedBox(height: 8),
@@ -85,7 +84,7 @@ class NfcScreenState extends State<NfcScreen> {
                         children: [
                           ElevatedButton(
                             onPressed: _tagRead,
-                            child: const Text('Scan Supratag'),
+                            child: const Text('Scan tag'),
                           ),
                           ElevatedButton(
                             onPressed: () => scanResult.value = null,
@@ -125,57 +124,31 @@ class NfcScreenState extends State<NfcScreen> {
   void _tagRead() {
     NfcManager.instance.startSession(onDiscovered: (NfcTag tag) async {
       try {
-        final ndef = Ndef.from(tag);
-        String? identifier;
-        
-        if (ndef != null) {
-          final message = await ndef.read();
-          if (message.records.isNotEmpty) {
-            final record = message.records.first;
-            if (record.payload.isNotEmpty && record.payload[0] == 3) {
-              // Skip URI prefix byte, extract identifier
-              identifier = String.fromCharCodes(record.payload.sublist(1));
-            }
-          }
+        final nfcv = NfcV.from(tag);
+        if (nfcv == null) {
+          throw Exception('Tag is not compatible with NfcV.');
         }
 
-        // Extract NFC tag ID
-        final tagIdentifier = tag.data['nfcv']?['identifier'] ?? 
-                             tag.data['ndef']?['identifier'] ?? 
-                             tag.data['nfca']?['identifier'];
-        
-        String nfcTagId = 'Unknown';
-        if (tagIdentifier != null) {
-          nfcTagId = (tagIdentifier as List<int>)
-              .map((e) => e.toRadixString(16).padLeft(2, '0'))
+        final nfcTagId = nfcv.identifier
+            .map((b) => b.toRadixString(16).padLeft(2, '0'))
               .join(':')
               .toUpperCase();
-        }
-
-        // Get tag type info
-        final tagTypes = tag.data.keys.join(', ');
-        final maxSize = ndef?.maxSize ?? 0;
-
-        // Update UI with decoded data
+        final identifier = nfcv.identifier.reversed
+            .map((b) => b.toRadixString(16).padLeft(2, '0'))
+            .join()
+            .toUpperCase();
+         
         scanResult.value = {
-          'identifier': identifier ?? 'Could not decode',
+          'identifier': identifier,
           'nfcTagId': nfcTagId,
           'scannedAt': DateTime.now().toString().substring(0, 19),
-          'tagType': tagTypes.toUpperCase(),
-          'memorySize': maxSize,
+          'tagType': 'NFCV',
+          'memorySize': nfcv.maxTransceiveLength,
         };
-
-        print('===== Supratag Decoded =====');
-        print('Identifier: $identifier');
-        print('NFC Tag ID: $nfcTagId');
-        print('Tag Types: $tagTypes');
-        
       } catch (e) {
-        print('Error reading tag: $e');
         scanResult.value = {
           'identifier': 'Error: $e',
           'nfcTagId': 'N/A',
-          'scannedAt': DateTime.now().toString().substring(0, 19),
           'tagType': 'Error',
           'memorySize': 0,
         };

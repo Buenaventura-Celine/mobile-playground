@@ -4,7 +4,6 @@ import 'package:mobile_playground/home/presentation/home_screen.dart';
 import 'package:mobile_playground/nfc_scanner/presentation/nfc_error_screen.dart';
 import 'package:mobile_playground/nfc_scanner/presentation/nfc_scanned_screen.dart';
 import 'package:mobile_playground/nfc_scanner/presentation/nfc_scanner_screen.dart';
-import 'package:mobile_playground/nfc_scanner/presentation/nfc_waiting_screen.dart';
 
 final GoRouter router = GoRouter(
   routes: <RouteBase>[
@@ -20,13 +19,7 @@ final GoRouter router = GoRouter(
             return const NfcScreen();
           },
           routes: <RouteBase>[
-            GoRoute(
-              path: 'nfc-waiting',
-              name: 'nfc-waiting',
-              builder: (BuildContext context, GoRouterState state) {
-                return const NfcWaitingScreen();
-              },
-            ),
+          
             GoRoute(
               path: 'nfc-success',
               name: 'nfc-success',

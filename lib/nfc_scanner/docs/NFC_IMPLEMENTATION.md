@@ -348,12 +348,108 @@ Current setup is sufficient for basic implementation. Additional packages may be
 - **HTTP Requests**: `http` or `dio` for document downloads
 - **State Management**: Consider `flutter_bloc` or `riverpod` for complex state
 
+## Actual Scan Results Analysis
+
+### Real Supratag Data Structure
+
+Based on actual scans of three Supratag samples, the NFC chips contain minimal data:
+
+#### Green Tag (Working in RiConnect)
+```
+NFC Identifier: [74, 40, 144, 230, 2, 35, 2, 224] → 4A2890E60223E0E0
+NDEF Payload: [3, 69, 48, 48, 50, 50, 51, 48, 50, 69, 54, 57, 48, 50, 56, 52, 65]
+- Byte 0: 3 (URI prefix "http://")
+- Bytes 1-16: E0022302E690284A (16-char alphanumeric ID)
+RiConnect S/N: E0022302E690284A ✓ MATCH
+```
+
+#### Red Tag (Failed inspection in RiConnect)
+```
+NFC Identifier: [51, 91, 243, 31, 1, 35, 2, 224] → 335BF31F012302E0
+NDEF Payload: [3, 69, 48, 48, 50, 50, 51, 48, 49, 49, 70, 70, 51, 53, 66, 51, 51]
+- Byte 0: 3 (URI prefix "http://")
+- Bytes 1-16: E00223011FF35B33 (16-char alphanumeric ID)
+RiConnect Asset#: E00223011FF35B33 ✓ MATCH
+```
+
+#### No Color Tag (Not uploaded to RiConnect)
+```
+NFC Identifier: [103, 134, 101, 102, 2, 35, 2, 224] → 6786656E022302E0
+NDEF Payload: [3, 69, 48, 48, 50, 50, 51, 48, 50, 54, 54, 54, 53, 56, 54, 54, 55]
+- Byte 0: 3 (URI prefix "http://")
+- Bytes 1-16: E0022302666658667 (16-char alphanumeric ID)
+```
+
+### Key Discoveries
+
+1. **Minimal On-Chip Data**: Supratags only store a 16-character alphanumeric identifier
+2. **RiConnect Architecture**: Uses the identifier as a lookup key for server-side data
+3. **Why Offline Fails**: All rich data (manufacturer, item#, dates, certificates) comes from API calls
+4. **NDEF Format**: Simple URI record with "http://" prefix + identifier
+
+### What Can Be Extracted Without API
+
+**From NFC Chip Directly:**
+- 16-character alphanumeric identifier (e.g., `E0022302E690284A`)
+- NFC tag identifier (hardware-level unique ID)
+- Tag type information (NFCV + NDEF capabilities)
+- Memory capacity (122 bytes max size)
+
+**NOT Available Without API:**
+- Manufacturer information
+- Product descriptions
+- Item numbers
+- Registration dates
+- Certificates/documents
+- Inspection status
+
+### Implementation Strategy Revision
+
+```dart
+class SupratagData {
+  final String identifier;       // Only data on chip
+  final String nfcTagId;        // Hardware tag ID
+  final DateTime scannedAt;     // Local scan timestamp
+  
+  // These would require API lookup:
+  // final String? manufacturer;
+  // final String? itemNumber;
+  // final String? productDescription;
+  // final DateTime? registeredDate;
+  // final List<DocumentReference>? documents;
+}
+```
+
+### Decoding Implementation
+
+```dart
+void _tagRead() {
+  NfcManager.instance.startSession(onDiscovered: (NfcTag tag) async {
+    final ndef = Ndef.from(tag);
+    if (ndef != null) {
+      final message = await ndef.read();
+      if (message.records.isNotEmpty) {
+        final record = message.records.first;
+        if (record.payload.isNotEmpty && record.payload[0] == 3) {
+          // Skip URI prefix byte, extract identifier
+          final identifier = String.fromCharCodes(
+            record.payload.sublist(1)
+          );
+          print('Supratag ID: $identifier');
+        }
+      }
+    }
+  });
+}
+```
+
 ## Conclusion
 
-The foundation is already in place with `nfc_manager` package for read-only operations. The implementation should focus on:
-1. **Complete Data Extraction**: Reading and parsing all available Supratag NDEF records
-2. **Robust Parsing System**: Handling various NDEF record types and data formats
-3. **User-friendly Interface**: Displaying extracted information similar to RiConnect
-4. **Offline Capability**: Caching read data for industrial environments without connectivity
+The foundation is already in place with `nfc_manager` package for read-only operations. However, based on actual scan results, the implementation should focus on:
 
-This read-focused approach will enable comprehensive Supratag data extraction while maintaining flexibility for future enhancements and additional NFC tag types. The emphasis on reading ensures maximum compatibility and data retrieval from industrial NFC tags.
+1. **Identifier Extraction**: Reading the 16-character alphanumeric ID from Supratag NDEF records
+2. **Local Storage**: Caching scanned identifiers for offline access
+3. **API Integration**: Designing system to lookup product data using the identifier (when online)
+4. **Offline-First Design**: Graceful handling when product data unavailable
+
+**Important Limitation**: Without RiConnect's API, you can only extract the basic identifier. All rich product information requires server-side lookup using this identifier as the key.

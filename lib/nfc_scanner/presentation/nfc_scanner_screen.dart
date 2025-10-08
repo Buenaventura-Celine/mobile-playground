@@ -1,3 +1,4 @@
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:nfc_manager/nfc_manager.dart';
@@ -133,10 +134,34 @@ class NfcScreenState extends State<NfcScreen> {
             .map((b) => b.toRadixString(16).padLeft(2, '0'))
               .join(':')
               .toUpperCase();
-        final identifier = nfcv.identifier.reversed
+
+        /// Why You Must Reverse NfcV Identifier Bytes?
+        /// When you read nfcv.identifier on Android,
+        /// you get the bytes in LSB-first order (as transmitted).
+        /// But for display and comparison purposes,
+        /// UIDs are conventionally shown in MSB-first order (reverse).
+        ///
+        /// Reference: https://en.wikipedia.org/wiki/ISO/IEC_15693
+        /// According to the ISO 15693 protocol, multi-byte fields including the UID
+        /// (Unique Identifier) are transmitted least significant byte (LSB) first over the ai
+        ///
+        /// Reference: https://github.com/chariotsolutions/phonegap-nfc/issues/446#issuecomment-1622738307
+        /// https://github.com/chariotsolutions/phonegap-nfc/issues/446#issuecomment-1622738307
+        ///
+        /// iOS Raw: [224, 4, 1, 80, 118, 210, 129, 5]
+        ///Hex: e004015076d28105 (MSB-first)
+        ///Android Raw: [5, -127, -46, 118, 80, 1, 4, -32]
+        ///Hex: 0581d276500104e0 (LSB-first as received)
+        String identifier = nfcv.identifier.reversed
             .map((b) => b.toRadixString(16).padLeft(2, '0'))
             .join()
             .toUpperCase();
+        if (Platform.isIOS) {
+          identifier = nfcv.identifier
+            .map((b) => b.toRadixString(16).padLeft(2, '0'))
+            .join()
+            .toUpperCase();
+        }
          
         scanResult.value = {
           'identifier': identifier,

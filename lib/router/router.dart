@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile_playground/home/presentation/home_screen.dart';
-import 'package:mobile_playground/nfc_scanner/presentation/nfc_error_screen.dart';
-import 'package:mobile_playground/nfc_scanner/presentation/nfc_scanned_screen.dart';
 import 'package:mobile_playground/nfc_scanner/presentation/nfc_scanner_screen.dart';
 
 final GoRouter router = GoRouter(
@@ -18,27 +16,6 @@ final GoRouter router = GoRouter(
           builder: (BuildContext context, GoRouterState state) {
             return const NfcScreen();
           },
-          routes: <RouteBase>[
-          
-            GoRoute(
-              path: 'nfc-success',
-              name: 'nfc-success',
-              builder: (BuildContext context, GoRouterState state) {
-                return const NfcScannedScreen(
-                  scannedData: '',
-                );
-              },
-            ),
-            GoRoute(
-              path: 'nfc-error',
-              name: 'nfc-error',
-              builder: (BuildContext context, GoRouterState state) {
-                return const NfcErrorScreen(
-                  errorMessage: '',
-                );
-              },
-            ),
-          ],
         ),
       ],
     ),

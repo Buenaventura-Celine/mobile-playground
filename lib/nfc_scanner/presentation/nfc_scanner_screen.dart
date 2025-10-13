@@ -83,7 +83,7 @@ class NfcScreenState extends State<NfcScreen> {
                     Flexible(
                       flex: 3,
                       child: GridView.count(
-                        padding: EdgeInsets.all(4),
+                        padding: const EdgeInsets.all(4),
                         crossAxisCount: 2,
                         childAspectRatio: 4,
                         crossAxisSpacing: 4,

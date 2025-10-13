@@ -36,7 +36,8 @@ class NfcScreenState extends State<NfcScreen> {
                           border: Border.all(color: Colors.grey),
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: ValueListenableBuilder<Map<String, dynamic>?>(
+                        child:
+                            ValueListenableBuilder<Map<String, dynamic>?>(
                           valueListenable: scanResult,
                           builder: (context, data, _) {
                             if (data == null) {
@@ -50,15 +51,20 @@ class NfcScreenState extends State<NfcScreen> {
                             }
                             return SingleChildScrollView(
                               child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                                crossAxisAlignment:
+                                    CrossAxisAlignment.start,
                                 children: [
-                                  _buildDataRow('Supratag ID', data['identifier']),
+                                  _buildDataRow(
+                                      'Supratag ID', data['identifier']),
                                   const SizedBox(height: 8),
-                                  _buildDataRow('NFC Tag ID', data['nfcTagId']),
+                                  _buildDataRow(
+                                      'NFC Tag ID', data['nfcTagId']),
                                   const SizedBox(height: 8),
-                                  _buildDataRow('Tag Type', data['tagType']),
+                                  _buildDataRow(
+                                      'Tag Type', data['tagType']),
                                   const SizedBox(height: 8),
-                                  _buildDataRow('Memory Size', '${data['memorySize']} bytes'),
+                                  _buildDataRow('Memory Size',
+                                      '${data['memorySize']} bytes'),
                                   const SizedBox(height: 16),
                                   const Text(
                                     'Note: Product details require API lookup',
@@ -132,8 +138,8 @@ class NfcScreenState extends State<NfcScreen> {
 
         final nfcTagId = nfcv.identifier
             .map((b) => b.toRadixString(16).padLeft(2, '0'))
-              .join(':')
-              .toUpperCase();
+            .join(':')
+            .toUpperCase();
 
         /// Why You Must Reverse NfcV Identifier Bytes?
         /// When you read nfcv.identifier on Android,
@@ -158,11 +164,11 @@ class NfcScreenState extends State<NfcScreen> {
             .toUpperCase();
         if (Platform.isIOS) {
           identifier = nfcv.identifier
-            .map((b) => b.toRadixString(16).padLeft(2, '0'))
-            .join()
-            .toUpperCase();
+              .map((b) => b.toRadixString(16).padLeft(2, '0'))
+              .join()
+              .toUpperCase();
         }
-         
+
         scanResult.value = {
           'identifier': identifier,
           'nfcTagId': nfcTagId,

@@ -40,6 +40,7 @@ dependencies:
   
   # Additional UI components
   card_swiper: ^3.0.1
+  nfc_manager: ^3.5.0
 
 dev_dependencies:
   flutter_test:

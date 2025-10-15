@@ -42,6 +42,10 @@ dependencies:
   card_swiper: ^3.0.1
   nfc_manager: ^3.5.0
 
+  #state management
+  flutter_riverpod: ^2.5.1
+  hooks_riverpod: ^2.5.2
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

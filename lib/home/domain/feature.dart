@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobile_playground/router/router.dart';
 
 class Feature {
   final String title;
@@ -17,12 +18,12 @@ class Feature {
 }
 
 final List<Feature> features = [
-  const Feature(
+  Feature(
     title: 'NFC Scanner',
     description: 'Scan and read NFC tags',
     icon: Icons.nfc,
     color: Colors.blue,
-    route: '/nfc',
+    route: '/${AppRoute.nfc.name}',
   ),
   // const Feature(
   //   title: 'Camera',

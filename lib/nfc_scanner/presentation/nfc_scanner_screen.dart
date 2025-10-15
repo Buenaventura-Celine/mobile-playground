@@ -17,7 +17,10 @@ class NfcScreenState extends State<NfcScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('NFC Scanner')),
+      appBar: AppBar(
+        title: const Text('NFC Scanner'),
+        centerTitle: true,
+      ),
       body: SafeArea(
         child: FutureBuilder<bool>(
           future: NfcManager.instance.isAvailable(),
@@ -33,19 +36,36 @@ class NfcScreenState extends State<NfcScreen> {
                         margin: const EdgeInsets.all(8),
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey),
-                          borderRadius: BorderRadius.circular(8),
+                          color: Theme.of(context).colorScheme.surfaceContainer,
+                          border: Border.all(
+                            color: Theme.of(context).colorScheme.outline,
+                            width: 1,
+                          ),
+                          borderRadius: BorderRadius.circular(16),
                         ),
                         child:
                             ValueListenableBuilder<Map<String, dynamic>?>(
                           valueListenable: scanResult,
                           builder: (context, data, _) {
                             if (data == null) {
-                              return const Center(
-                                child: Text(
-                                  'Tap "Scan tag" to read an NFC tag',
-                                  style: TextStyle(fontSize: 16),
-                                  textAlign: TextAlign.center,
+                              return Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.nfc,
+                                      size: 64,
+                                      color: Theme.of(context).colorScheme.primary,
+                                    ),
+                                    const SizedBox(height: 16),
+                                    Text(
+                                      'Tap "Scan tag" to read an NFC tag',
+                                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ],
                                 ),
                               );
                             }
@@ -66,11 +86,11 @@ class NfcScreenState extends State<NfcScreen> {
                                   _buildDataRow('Memory Size',
                                       '${data['memorySize']} bytes'),
                                   const SizedBox(height: 16),
-                                  const Text(
+                                  Text(
                                     'Note: Product details require API lookup',
-                                    style: TextStyle(
+                                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                       fontStyle: FontStyle.italic,
-                                      color: Colors.grey,
+                                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                                     ),
                                   ),
                                 ],
@@ -89,13 +109,15 @@ class NfcScreenState extends State<NfcScreen> {
                         crossAxisSpacing: 4,
                         mainAxisSpacing: 4,
                         children: [
-                          ElevatedButton(
+                          FilledButton.icon(
                             onPressed: _tagRead,
-                            child: const Text('Scan tag'),
+                            icon: const Icon(Icons.nfc),
+                            label: const Text('Scan Tag'),
                           ),
-                          ElevatedButton(
+                          OutlinedButton.icon(
                             onPressed: () => scanResult.value = null,
-                            child: const Text('Clear'),
+                            icon: const Icon(Icons.clear),
+                            label: const Text('Clear'),
                           ),
                         ],
                       ),
@@ -115,13 +137,19 @@ class NfcScreenState extends State<NfcScreen> {
           width: 100,
           child: Text(
             '$label:',
-            style: const TextStyle(fontWeight: FontWeight.bold),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
           ),
         ),
         Expanded(
           child: Text(
             value ?? 'N/A',
-            style: const TextStyle(fontFamily: 'monospace'),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              fontFamily: 'monospace',
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
           ),
         ),
       ],

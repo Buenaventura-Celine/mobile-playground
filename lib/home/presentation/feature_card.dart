@@ -13,13 +13,11 @@ class FeatureCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      elevation: 0,
+      elevation: 2,
+      shadowColor: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.1),
+      color: Theme.of(context).colorScheme.surfaceContainer,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(
-          color: Theme.of(context).colorScheme.outline,
-          width: 1,
-        ),
       ),
       child: InkWell(
         onTap: onTap,
@@ -32,8 +30,8 @@ class FeatureCard extends StatelessWidget {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                feature.color.withOpacity(0.1),
-                feature.color.withOpacity(0.05),
+                Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
+                Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.1),
               ],
             ),
           ),
@@ -43,13 +41,13 @@ class FeatureCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: feature.color.withOpacity(0.2),
+                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Icon(
                   feature.icon,
                   size: 32,
-                  color: feature.color,
+                  color: Theme.of(context).colorScheme.primary,
                 ),
               ),
               const SizedBox(height: 16),

@@ -45,7 +45,8 @@ dependencies:
   #state management
   flutter_riverpod: ^2.5.1
   hooks_riverpod: ^2.5.2
-
+  google_fonts: ^6.3.0
+  
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -97,3 +98,4 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+

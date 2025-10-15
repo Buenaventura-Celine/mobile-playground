@@ -15,6 +15,24 @@ class HomeScreen extends ConsumerWidget {
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
         elevation: 0,
+        actions: [
+          Container(
+            margin: const EdgeInsets.only(top: 16.0, left: 16.0),
+            child: IconButton(
+              onPressed: () {
+                print('Theme toggle pressed');
+                ref.read(themeControllerProvider.notifier).toggleTheme();
+              },
+              tooltip: 'Toggle theme',
+              icon: Icon(
+                size: 32,
+                Theme.of(context).brightness == Brightness.dark
+                    ? Icons.light_mode
+                    : Icons.dark_mode,
+              ),
+            ),
+          ),
+        ],
       ),
       body: SafeArea(
         child: CustomScrollView(
@@ -77,18 +95,6 @@ class HomeScreen extends ConsumerWidget {
               child: SizedBox(height: 32),
             ),
           ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          ref.read(themeControllerProvider.notifier).toggleTheme();
-        },
-        tooltip: 'Toggle theme',
-        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-        child: Icon(
-          Theme.of(context).brightness == Brightness.dark
-              ? Icons.light_mode
-              : Icons.dark_mode,
         ),
       ),
     );

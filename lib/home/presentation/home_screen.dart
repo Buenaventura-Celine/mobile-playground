@@ -20,7 +20,6 @@ class HomeScreen extends ConsumerWidget {
             margin: const EdgeInsets.only(top: 16.0, left: 16.0),
             child: IconButton(
               onPressed: () {
-                print('Theme toggle pressed');
                 ref.read(themeControllerProvider.notifier).toggleTheme();
               },
               tooltip: 'Toggle theme',

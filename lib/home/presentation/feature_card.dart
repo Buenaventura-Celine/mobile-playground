@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:mobile_playground/home/domain/feature.dart';
 
@@ -14,7 +16,7 @@ class FeatureCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       elevation: 2,
-      shadowColor: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.1),
+      shadowColor: Theme.of(context).colorScheme.shadow.withOpacity(0.1),
       color: Theme.of(context).colorScheme.surfaceContainer,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
@@ -30,8 +32,8 @@ class FeatureCard extends StatelessWidget {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
-                Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.1),
+                Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
+                Theme.of(context).colorScheme.primaryContainer.withOpacity(0.1),
               ],
             ),
           ),
@@ -41,7 +43,7 @@ class FeatureCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Icon(

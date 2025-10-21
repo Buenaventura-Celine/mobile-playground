@@ -43,6 +43,21 @@
 	</array>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
+	<!-- NFC Configuration -->
+	<key>NFCReaderUsageDescription</key>
+	<string>This app uses NFC to read compatible NFC tags.</string>
+	<!-- End NFC Configuration -->
+	<!-- ISO7816 Select Identifiers (for iso14443) -->
+	<key>com.apple.developer.nfc.readersession.iso7816.select-identifiers</key>
+	<array>
+					<string>A0000000031010</string>
+	</array>
+	<!-- FeliCa System Codes (REQUIRED for iso18092) -->
+	<key>com.apple.developer.nfc.readersession.felica.systemcodes</key>
+	<array>
+					<string>12FC</string>
+					<string>FFFF</string>
+	</array>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 </dict>

@@ -29,7 +29,7 @@ final GoRouter router = GoRouter(
         GoRoute(
           path: AppRoute.nfc.name,
           builder: (BuildContext context, GoRouterState state) {
-            return const NfcScreen();
+            return const NfcScannerScanner();
           },
         ),
         GoRoute(

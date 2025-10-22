@@ -7,7 +7,6 @@ import 'package:mobile_playground/nfc_scanner/presentation/nfc_screen_types.dart
 import 'package:mobile_playground/nfc_scanner/presentation/nfc_screen_types.dart/nfc_scanning_screen.dart';
 import 'package:mobile_playground/nfc_scanner/presentation/nfc_screen_types.dart/nfc_success_screen.dart';
 import 'package:mobile_playground/nfc_scanner/presentation/nfc_screen_types.dart/nfc_turned_off_screen.dart';
-import 'package:mobile_playground/nfc_scanner/presentation/nfc_screen_types.dart/nfc_unsupported_screen.dart';
 import 'package:mobile_playground/nfc_scanner/services/nfc_scanner_controller.dart';
 
 class NfcScannerScanner extends ConsumerWidget {
@@ -44,15 +43,14 @@ class NfcScannerScanner extends ConsumerWidget {
       ),
       scanning: () =>
           NfcScanningScreen(onCancel: handleCancel),
-      success: (_) => const NfcSuccessScreen(),
+      success: (details) => NfcSuccessScreen(
+        onCancel: handleCancel,
+        tagDetails: details,
+        onTryAgain: handleTryAgain,
+      ),
       error: (message) => NfcErrorScreen(
         title: 'Scan Failed',
         subtitle: message,
-        onTryAgain: handleTryAgain,
-        onCancel: handleCancel,
-      ),
-      unsupported: (details) => NfcUnsupportedScreen(
-        tagDetails: details,
         onTryAgain: handleTryAgain,
         onCancel: handleCancel,
       ),

@@ -8,8 +8,6 @@ sealed class NfcScannerState with _$NfcScannerState {
   const factory NfcScannerState.unavailable() = _Unavailable;
   const factory NfcScannerState.disabled() = _Disabled;
   const factory NfcScannerState.scanning() = _Scanning;
-  const factory NfcScannerState.success(String value) = _Success;
+  const factory NfcScannerState.success(Map<String, String> details) = _Success;
   const factory NfcScannerState.error(String message) = _Error;
-  const factory NfcScannerState.unsupported(Map<String, String> details) =
-      _Unsupported;
 }

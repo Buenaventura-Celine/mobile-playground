@@ -1,11 +1,8 @@
-import 'dart:io';
-
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile_playground/nfc_scanner/domains/nfc_scanner_state.dart';
 import 'package:nfc_manager/nfc_manager.dart';
 import 'package:nfc_manager/nfc_manager_android.dart';
-import 'package:nfc_manager/nfc_manager_ios.dart';
 
 // ignore: constant_identifier_names
 const NFC_CODE_UNSUPPORTED = 'not_supported';
@@ -53,36 +50,9 @@ class NfcScannerController extends Notifier<NfcScannerState> {
       },
       onDiscovered: (NfcTag tag) async {
         try {
-          if (Platform.isAndroid) {
-            final nfcv = NfcVAndroid.from(tag);
-            if (nfcv == null) {
-              _decodeOtherTagType(tag);
-              return;
-            }
-
-            final identifier = nfcv.tag.id;
-            final value = identifier.reversed
-                .map((b) => b.toRadixString(16).padLeft(2, '0'))
-                .join()
-                .toUpperCase();
-            await NfcManager.instance.stopSession();
-            state = NfcScannerState.success(value);
-            return;
-          }
-
-          final iso15693 = Iso15693Ios.from(tag);
-          if (iso15693 == null) {
-            _decodeOtherTagType(tag);
-            return;
-          }
-
-          final identifier = iso15693.identifier;
-          final value = identifier
-              .map((b) => b.toRadixString(16).padLeft(2, '0'))
-              .join()
-              .toUpperCase();
+          _decodeTagType(tag);
           await NfcManager.instance.stopSession();
-          state = NfcScannerState.success(value);
+
           return;
         } catch (e, _) {
           state = NfcScannerState.error(e.toString());
@@ -97,8 +67,8 @@ class NfcScannerController extends Notifier<NfcScannerState> {
     state = const NfcScannerState.checking();
     _checkNfcAvailability();
   }
- 
-  void _decodeOtherTagType(NfcTag tag) {
+
+  void _decodeTagType(NfcTag tag) {
     try {
       final details = <String, String>{};
 
@@ -227,7 +197,7 @@ class NfcScannerController extends Notifier<NfcScannerState> {
 
       details['Technologies'] = technologies.join(', ');
 
-      state = NfcScannerState.unsupported(details);
+      state = NfcScannerState.success(details);
     } catch (e, _) {
       state = NfcScannerState.error(e.toString());
     }
@@ -236,5 +206,5 @@ class NfcScannerController extends Notifier<NfcScannerState> {
 
 final nfcScannerControllerProvider =
     NotifierProvider.autoDispose<NfcScannerController, NfcScannerState>(
-  NfcScannerController.new,
-);
+      NfcScannerController.new,
+    );

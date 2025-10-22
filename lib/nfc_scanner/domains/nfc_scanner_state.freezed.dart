@@ -55,7 +55,7 @@ extension NfcScannerStatePatterns on NfcScannerState {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Checking value)?  checking,TResult Function( _Unavailable value)?  unavailable,TResult Function( _Disabled value)?  disabled,TResult Function( _Scanning value)?  scanning,TResult Function( _Success value)?  success,TResult Function( _Error value)?  error,TResult Function( _Unsupported value)?  unsupported,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Checking value)?  checking,TResult Function( _Unavailable value)?  unavailable,TResult Function( _Disabled value)?  disabled,TResult Function( _Scanning value)?  scanning,TResult Function( _Success value)?  success,TResult Function( _Error value)?  error,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _Checking() when checking != null:
@@ -64,8 +64,7 @@ return unavailable(_that);case _Disabled() when disabled != null:
 return disabled(_that);case _Scanning() when scanning != null:
 return scanning(_that);case _Success() when success != null:
 return success(_that);case _Error() when error != null:
-return error(_that);case _Unsupported() when unsupported != null:
-return unsupported(_that);case _:
+return error(_that);case _:
   return orElse();
 
 }
@@ -83,7 +82,7 @@ return unsupported(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Checking value)  checking,required TResult Function( _Unavailable value)  unavailable,required TResult Function( _Disabled value)  disabled,required TResult Function( _Scanning value)  scanning,required TResult Function( _Success value)  success,required TResult Function( _Error value)  error,required TResult Function( _Unsupported value)  unsupported,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Checking value)  checking,required TResult Function( _Unavailable value)  unavailable,required TResult Function( _Disabled value)  disabled,required TResult Function( _Scanning value)  scanning,required TResult Function( _Success value)  success,required TResult Function( _Error value)  error,}){
 final _that = this;
 switch (_that) {
 case _Checking():
@@ -92,8 +91,7 @@ return unavailable(_that);case _Disabled():
 return disabled(_that);case _Scanning():
 return scanning(_that);case _Success():
 return success(_that);case _Error():
-return error(_that);case _Unsupported():
-return unsupported(_that);}
+return error(_that);}
 }
 /// A variant of `map` that fallback to returning `null`.
 ///
@@ -107,7 +105,7 @@ return unsupported(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Checking value)?  checking,TResult? Function( _Unavailable value)?  unavailable,TResult? Function( _Disabled value)?  disabled,TResult? Function( _Scanning value)?  scanning,TResult? Function( _Success value)?  success,TResult? Function( _Error value)?  error,TResult? Function( _Unsupported value)?  unsupported,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Checking value)?  checking,TResult? Function( _Unavailable value)?  unavailable,TResult? Function( _Disabled value)?  disabled,TResult? Function( _Scanning value)?  scanning,TResult? Function( _Success value)?  success,TResult? Function( _Error value)?  error,}){
 final _that = this;
 switch (_that) {
 case _Checking() when checking != null:
@@ -116,8 +114,7 @@ return unavailable(_that);case _Disabled() when disabled != null:
 return disabled(_that);case _Scanning() when scanning != null:
 return scanning(_that);case _Success() when success != null:
 return success(_that);case _Error() when error != null:
-return error(_that);case _Unsupported() when unsupported != null:
-return unsupported(_that);case _:
+return error(_that);case _:
   return null;
 
 }
@@ -134,16 +131,15 @@ return unsupported(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  checking,TResult Function()?  unavailable,TResult Function()?  disabled,TResult Function()?  scanning,TResult Function( String value)?  success,TResult Function( String message)?  error,TResult Function( Map<String, String> details)?  unsupported,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  checking,TResult Function()?  unavailable,TResult Function()?  disabled,TResult Function()?  scanning,TResult Function( Map<String, String> details)?  success,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Checking() when checking != null:
 return checking();case _Unavailable() when unavailable != null:
 return unavailable();case _Disabled() when disabled != null:
 return disabled();case _Scanning() when scanning != null:
 return scanning();case _Success() when success != null:
-return success(_that.value);case _Error() when error != null:
-return error(_that.message);case _Unsupported() when unsupported != null:
-return unsupported(_that.details);case _:
+return success(_that.details);case _Error() when error != null:
+return error(_that.message);case _:
   return orElse();
 
 }
@@ -161,16 +157,15 @@ return unsupported(_that.details);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  checking,required TResult Function()  unavailable,required TResult Function()  disabled,required TResult Function()  scanning,required TResult Function( String value)  success,required TResult Function( String message)  error,required TResult Function( Map<String, String> details)  unsupported,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  checking,required TResult Function()  unavailable,required TResult Function()  disabled,required TResult Function()  scanning,required TResult Function( Map<String, String> details)  success,required TResult Function( String message)  error,}) {final _that = this;
 switch (_that) {
 case _Checking():
 return checking();case _Unavailable():
 return unavailable();case _Disabled():
 return disabled();case _Scanning():
 return scanning();case _Success():
-return success(_that.value);case _Error():
-return error(_that.message);case _Unsupported():
-return unsupported(_that.details);}
+return success(_that.details);case _Error():
+return error(_that.message);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -184,16 +179,15 @@ return unsupported(_that.details);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  checking,TResult? Function()?  unavailable,TResult? Function()?  disabled,TResult? Function()?  scanning,TResult? Function( String value)?  success,TResult? Function( String message)?  error,TResult? Function( Map<String, String> details)?  unsupported,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  checking,TResult? Function()?  unavailable,TResult? Function()?  disabled,TResult? Function()?  scanning,TResult? Function( Map<String, String> details)?  success,TResult? Function( String message)?  error,}) {final _that = this;
 switch (_that) {
 case _Checking() when checking != null:
 return checking();case _Unavailable() when unavailable != null:
 return unavailable();case _Disabled() when disabled != null:
 return disabled();case _Scanning() when scanning != null:
 return scanning();case _Success() when success != null:
-return success(_that.value);case _Error() when error != null:
-return error(_that.message);case _Unsupported() when unsupported != null:
-return unsupported(_that.details);case _:
+return success(_that.details);case _Error() when error != null:
+return error(_that.message);case _:
   return null;
 
 }
@@ -333,10 +327,16 @@ String toString() {
 
 
 class _Success implements NfcScannerState {
-  const _Success(this.value);
+  const _Success(final  Map<String, String> details): _details = details;
   
 
- final  String value;
+ final  Map<String, String> _details;
+ Map<String, String> get details {
+  if (_details is EqualUnmodifiableMapView) return _details;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableMapView(_details);
+}
+
 
 /// Create a copy of NfcScannerState
 /// with the given fields replaced by the non-null parameter values.
@@ -348,16 +348,16 @@ _$SuccessCopyWith<_Success> get copyWith => __$SuccessCopyWithImpl<_Success>(thi
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Success&&(identical(other.value, value) || other.value == value));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Success&&const DeepCollectionEquality().equals(other._details, _details));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,value);
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_details));
 
 @override
 String toString() {
-  return 'NfcScannerState.success(value: $value)';
+  return 'NfcScannerState.success(details: $details)';
 }
 
 
@@ -368,7 +368,7 @@ abstract mixin class _$SuccessCopyWith<$Res> implements $NfcScannerStateCopyWith
   factory _$SuccessCopyWith(_Success value, $Res Function(_Success) _then) = __$SuccessCopyWithImpl;
 @useResult
 $Res call({
- String value
+ Map<String, String> details
 });
 
 
@@ -385,10 +385,10 @@ class __$SuccessCopyWithImpl<$Res>
 
 /// Create a copy of NfcScannerState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? value = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? details = null,}) {
   return _then(_Success(
-null == value ? _self.value : value // ignore: cast_nullable_to_non_nullable
-as String,
+null == details ? _self._details : details // ignore: cast_nullable_to_non_nullable
+as Map<String, String>,
   ));
 }
 
@@ -455,78 +455,6 @@ class __$ErrorCopyWithImpl<$Res>
   return _then(_Error(
 null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
 as String,
-  ));
-}
-
-
-}
-
-/// @nodoc
-
-
-class _Unsupported implements NfcScannerState {
-  const _Unsupported(final  Map<String, String> details): _details = details;
-  
-
- final  Map<String, String> _details;
- Map<String, String> get details {
-  if (_details is EqualUnmodifiableMapView) return _details;
-  // ignore: implicit_dynamic_type
-  return EqualUnmodifiableMapView(_details);
-}
-
-
-/// Create a copy of NfcScannerState
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-_$UnsupportedCopyWith<_Unsupported> get copyWith => __$UnsupportedCopyWithImpl<_Unsupported>(this, _$identity);
-
-
-
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Unsupported&&const DeepCollectionEquality().equals(other._details, _details));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_details));
-
-@override
-String toString() {
-  return 'NfcScannerState.unsupported(details: $details)';
-}
-
-
-}
-
-/// @nodoc
-abstract mixin class _$UnsupportedCopyWith<$Res> implements $NfcScannerStateCopyWith<$Res> {
-  factory _$UnsupportedCopyWith(_Unsupported value, $Res Function(_Unsupported) _then) = __$UnsupportedCopyWithImpl;
-@useResult
-$Res call({
- Map<String, String> details
-});
-
-
-
-
-}
-/// @nodoc
-class __$UnsupportedCopyWithImpl<$Res>
-    implements _$UnsupportedCopyWith<$Res> {
-  __$UnsupportedCopyWithImpl(this._self, this._then);
-
-  final _Unsupported _self;
-  final $Res Function(_Unsupported) _then;
-
-/// Create a copy of NfcScannerState
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? details = null,}) {
-  return _then(_Unsupported(
-null == details ? _self._details : details // ignore: cast_nullable_to_non_nullable
-as Map<String, String>,
   ));
 }
 

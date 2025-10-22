@@ -11,7 +11,10 @@ class NfcScannerController extends Notifier<NfcScannerState> {
   @override
   NfcScannerState build() {
     ref.onDispose(() {
-      NfcManager.instance.stopSession();
+      // Try to stop session, but ignore errors during disposal
+      NfcManager.instance.stopSession().catchError((_) {
+        // Ignore errors during disposal (e.g., in tests)
+      });
     });
 
     _checkNfcAvailability();
@@ -21,6 +24,10 @@ class NfcScannerController extends Notifier<NfcScannerState> {
   Future<void> _checkNfcAvailability() async {
     try {
       final isAvailable = await NfcManager.instance.isAvailable();
+
+      // Check if still mounted after async operation
+      if (!ref.mounted) return;
+
       if (!isAvailable) {
         state = const NfcScannerState.disabled();
         return;
@@ -29,6 +36,9 @@ class NfcScannerController extends Notifier<NfcScannerState> {
       state = const NfcScannerState.scanning();
       startScanning();
     } catch (e) {
+      // Check if still mounted after async operation
+      if (!ref.mounted) return;
+
       if (e is PlatformException) {
         final notSupported = e.code == NFC_CODE_UNSUPPORTED;
         if (notSupported) {

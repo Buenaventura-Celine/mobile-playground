@@ -1,91 +1,395 @@
-# NFC Implementation Guide
+# NFC Scanning Implementation Guide
+
+This document provides a comprehensive overview of how NFC (Near Field Communication) scanning was implemented in this Flutter application.
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Dependencies](#dependencies)
+- [Architecture](#architecture)
+- [Platform Configuration](#platform-configuration)
+- [Implementation Details](#implementation-details)
+- [Usage](#usage)
+- [Supported NFC Technologies](#supported-nfc-technologies)
+- [Troubleshooting](#troubleshooting)
 
 ## Overview
 
-This document outlines the implementation approach for NFC scanning functionality in our Flutter mobile application. The implementation supports various NFC tag types and provides a flexible foundation for reading different NFC technologies.
+The NFC scanning feature allows users to read various types of NFC tags using their mobile device. The implementation supports both Android and iOS platforms and can read 8 different NFC tag technologies.
 
-### Mobile Device Requirements
-- **iOS**: Version 14 or later
-- **Android**: API level 19 or later (Android 12+ recommended)
-- NFC-enabled device
+**Key Features:**
+- Multi-platform support (Android & iOS)
+- 8 different NFC tag technology support
+- Comprehensive error handling
+- Animated scanning UI
+- Automatic resource cleanup
+- Clean architecture with state management
 
-## Current Package Status
+## Dependencies
 
-✅ **Already Installed**: `nfc_manager: ^3.5.0`
+### Main Package
 
-The project includes the `nfc_manager` package, which provides comprehensive NFC operations including:
-- Reading NDEF formatted tags
-- Extracting tag identifiers and metadata
-- Parsing multiple NDEF records
-- Cross-platform reading support (iOS/Android)
-- Support for multiple NFC tag types and protocols
+```yaml
+nfc_manager: ^4.0.2
+```
 
-## Supported NFC Tag Types
+The `nfc_manager` package provides a unified API for NFC operations across Android and iOS platforms.
 
-The `nfc_manager` package supports various NFC tag types across different platforms. Here's a comprehensive overview:
+### Additional Dependencies
 
-| NFC Type             | Platform | NFC Forum Type | NFC Standard / Protocol  | Typical Use Case                                                                                                                               | Decoding Difficulty | Why This Difficulty                                                       |
-| -------------------- | -------- | -------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- | ------------------------------------------------------------------------- |
-| **NfcA**             | Android  | Type 1, 2, 4   | ISO 14443-3A             | General NFC tags, access cards, mobile payments                                                                                                | 🟢 Easy              | Raw low-level access; simple command structure                            |
-| **NfcB**             | Android  | Type 4         | ISO 14443-3B             | Banking cards, ID cards, secure documents                                                                                                      | 🟡 Medium            | Less common than NfcA; similar structure but different modulation         |
-| **NfcF**             | Android  | Type 3         | JIS X 6319-4 (FeliCa)    | Japanese transit cards, mobile payments                                                                                                        | 🟡 Medium            | Proprietary Sony protocol; requires understanding FeliCa systems          |
-| **NfcV**             | Android  | Type 5         | ISO 15693                | Industrial automation, manufacturing tracking, warehouse management, asset tracking, library systems, pharmaceutical tracking, laundry systems | 🟢 Easy              | Well-documented standard; straightforward commands; standardized protocol |
-| **IsoDep**           | Android  | Type 4         | ISO 14443-4              | Credit/debit cards, secure access, passports                                                                                                   | 🟡 Medium            | Higher-level protocol; requires understanding APDU commands               |
-| **MifareClassic**    | Android  | Proprietary    | NXP Mifare Classic       | Access control, transit tickets, hotel keys                                                                                                    | 🔴 Difficult         | Proprietary encryption; security sectors; authentication required         |
-| **MifareUltralight** | Android  | Type 2         | NXP Mifare Ultralight    | Disposable tickets, loyalty cards, simple tags                                                                                                 | 🟢 Easy              | Simple memory structure; minimal/no encryption                            |
-| **NfcBarcode**       | Android  | -              | Kovio/Thinfilm           | Product tracking, anti-counterfeiting                                                                                                          | 🟢 Easy              | Read-only; simple data structure                                          |
-| **Ndef**             | Android  | All Types      | NFC Data Exchange Format | Universal data storage (URLs, text, etc.)                                                                                                      | 🟢 Easy              | Standardized format; well-documented; library support                     |
-| **NdefFormatable**   | Android  | Variable       | NDEF-capable tags        | Blank tags that can be formatted                                                                                                               | 🟢 Easy              | Just requires formatting before use                                       |
-| **FeliCa**           | iOS      | Type 3         | JIS X 6319-4 (FeliCa)    | Japanese transit, mobile payments                                                                                                              | 🟡 Medium            | Proprietary Sony protocol; system code dependent                          |
-| **MiFare**           | iOS      | Type 2, 4      | ISO 14443A + Mifare      | Access control, transit, payments                                                                                                              | 🟡 Medium            | iOS restricts access; requires entitlements                               |
-| **Iso15693**         | iOS      | Type 5         | ISO 15693                | Industrial automation, manufacturing tracking, warehouse management, inventory systems, asset tracking                                         | 🟢 Easy              | Well-documented; straightforward implementation                           |
-| **Iso7816**          | iOS      | Type 4         | ISO/IEC 7816             | Smart cards, ID cards, payment cards                                                                                                           | 🟡 Medium            | Complex APDU command structure; application-specific                      |
-| **Ndef**             | iOS      | All Types      | NFC Data Exchange Format | Universal data storage (URLs, text, etc.)                                                                                                      | 🟢 Easy              | Standardized format; excellent iOS support                                |
+```yaml
+app_settings: ^5.1.1  # For opening device NFC settings
+```
 
-#### Potential Encoding Patterns
-1. **Multiple NDEF Records**: Each data field in separate record
-2. **Single JSON Record**: All data in one JSON-formatted text record
-3. **Binary Packed**: Custom binary format with fixed field positions
-4. **External Type**: Manufacturer-specific external record format
+## Architecture
 
+The NFC implementation follows a clean architecture pattern with separation of concerns:
 
-## Technical Considerations
+```
+lib/nfc_scanner/
+├── services/
+│   └── nfc_scanner_controller.dart          # Business logic & state management
+├── domains/
+│   ├── nfc_scanner_state.dart              # State definitions (Freezed)
+│   └── nfc_scanner_state.freezed.dart      # Generated state code
+└── presentation/
+    ├── nfc_scanner_screen.dart             # Main screen with state switching
+    └── nfc_screen_types/
+        ├── nfc_screen.dart                 # Base screen template
+        ├── nfc_checking_screen.dart        # Checking availability state
+        ├── nfc_error_screen.dart           # Error state
+        ├── nfc_scanning_screen.dart        # Active scanning with animation
+        ├── nfc_success_screen.dart         # Success state with tag details
+        ├── nfc_turned_off_screen.dart      # NFC disabled state
+        └── nfc_unsupported_screen.dart     # Unsupported device state
+```
 
-### NFC Data Formats
-Various NFC tags use different data formats depending on their intended use:
-- **NDEF (NFC Data Exchange Format)**: Standardized format for interoperability
-- **Raw Memory**: Direct memory access for custom applications
-- **Proprietary Formats**: Manufacturer-specific data structures
-- **Secured Formats**: Encrypted or authenticated data storage
+### State Management
 
-### Platform-Specific Reading Capabilities
+The implementation uses **Flutter Riverpod** for state management:
 
-#### iOS Reading Features
-- **NDEF Support**: Full support for reading NDEF formatted tags
-- **Session Management**: Requires explicit user interaction to start NFC reading session
-- **Background Reading**: Limited to iPhone XS/XR and newer models
-- **Tag Types**: FeliCa, MiFare, Iso15693, Iso7816, NDEF
+```dart
+final nfcScannerProvider = NotifierProvider.autoDispose<
+  NfcScannerController,
+  NfcScannerState
+>(NfcScannerController.new);
+```
 
-#### Android Reading Features  
-- **Comprehensive Reading**: Can read all NFC tag types and formats
-- **Background Reading**: Automatic tag detection when app is running
-- **Intent Filters**: Can launch app automatically when specific tags are detected
-- **Raw Data Access**: Can access low-level tag data beyond NDEF
-- **Tag Types**: NfcA, NfcB, NfcF, NfcV, IsoDep, MifareClassic, MifareUltralight, and more
+**State Types:**
+- `checking()` - Initial state while checking NFC availability
+- `unavailable()` - Device doesn't support NFC
+- `disabled()` - NFC is supported but turned off
+- `scanning()` - NFC is available and actively scanning
+- `success(details)` - Tag successfully read
+- `error(message)` - An error occurred
 
+## Platform Configuration
 
-## Conclusion
+### Android Configuration
 
-The `nfc_manager` package provides comprehensive NFC operations support. The implementation focuses on:
+#### 1. AndroidManifest.xml
 
-1. **Universal Tag Support**: Reading multiple NFC tag types with appropriate parsing strategies
-2. **Data Extraction**: Extracting all available information from each tag type
-3. **Local Storage**: Caching scanned tag data for offline access and history
-4. **Flexible Architecture**: Supporting future tag types and custom parsing logic
+**File:** `android/app/src/main/AndroidManifest.xml`
 
-**Key Advantages**: 
-- Support for multiple tag types across iOS and Android
-- Flexible data structure accommodating various tag formats
-- Extensible architecture for future tag type support
+Add NFC permission:
 
-**Future Expansion**: The tag types table serves as a reference for implementing additional tag type support. Each tag type can be added incrementally with specific parsing logic while maintaining the universal data structure.
+```xml
+<uses-permission android:name="android.permission.NFC" />
+```
+
+This permission will be requested at runtime on Android 6.0+.
+
+#### 2. MainActivity.kt - Foreground Dispatch
+
+**File:** `android/app/src/main/kotlin/com/example/mobile_playground/MainActivity.kt`
+
+Custom MainActivity implementation to handle NFC foreground dispatch:
+
+```kotlin
+package com.example.mobile_playground
+import android.app.PendingIntent
+import android.content.Intent
+import android.nfc.NfcAdapter
+import android.os.Build
+import io.flutter.embedding.android.FlutterActivity
+
+class MainActivity: FlutterActivity() {
+    private var nfcAdapter: NfcAdapter? = null
+    private var pendingIntent: PendingIntent? = null
+
+    override fun onResume() {
+        super.onResume()
+
+        nfcAdapter = NfcAdapter.getDefaultAdapter(this)
+
+        if (nfcAdapter != null) {
+            val intent = Intent(this, javaClass).apply {
+                addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+            }
+
+            val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                PendingIntent.FLAG_MUTABLE
+            } else {
+                0
+            }
+
+            pendingIntent = PendingIntent.getActivity(this, 0, intent, flags)
+            nfcAdapter?.enableForegroundDispatch(this, pendingIntent, null, null)
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        nfcAdapter?.disableForegroundDispatch(this)
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+    }
+}
+```
+
+**Purpose of Foreground Dispatch:**
+- **Priority Handling**: Ensures your app receives NFC intents while in the foreground
+- **Better User Experience**: Tags are handled immediately without system chooser dialogs
+- **Activity Lifecycle**: Automatically enables dispatch on resume and disables on pause
+- **Android 12+ Compatibility**: Uses `FLAG_MUTABLE` for PendingIntent on Android S (API 31) and above
+- **Single Top Launch**: Prevents multiple activity instances when scanning tags
+
+### iOS Configuration
+
+**File:** `ios/Runner/Info.plist`
+
+Add the following NFC configuration:
+
+```xml
+<!-- NFC Usage Description (Required for App Store) -->
+<key>NFCReaderUsageDescription</key>
+<string>This app uses NFC to read compatible NFC tags.</string>
+
+<!-- ISO 7816 Select Identifiers (for ISO 14443 support) -->
+<key>com.apple.developer.nfc.readersession.iso7816.select-identifiers</key>
+<array>
+    <string>A0000000031010</string>
+</array>
+
+<!-- FeliCa System Codes (Required for ISO 18092 support) -->
+<key>com.apple.developer.nfc.readersession.felica.systemcodes</key>
+<array>
+    <string>12FC</string>
+    <string>FFFF</string>
+</array>
+```
+
+**iOS Requirements:**
+- `NFCReaderUsageDescription` is mandatory for App Store submission
+- ISO 7816 identifiers must be declared for NFC reading
+- FeliCa system codes are needed for Japanese cards and transit systems
+
+## Implementation Details
+
+### Controller (`nfc_scanner_controller.dart`)
+
+Located at: `lib/nfc_scanner/services/nfc_scanner_controller.dart`
+
+#### Initialization Flow
+
+1. **Check NFC Availability:**
+```dart
+final isAvailable = await NfcManager.instance.isAvailable();
+```
+
+2. **Start NFC Session with Polling Options:**
+```dart
+NfcManager.instance.startSession(
+  pollingOptions: {
+    NfcPollingOption.iso15693,    // NFC-V (ISO 15693)
+    NfcPollingOption.iso14443,    // NFC-A/B (ISO 14443)
+    NfcPollingOption.iso18092,    // FeliCa (NFC-F)
+  },
+  onDiscovered: (NfcTag tag) async {
+    // Process discovered tag
+  },
+);
+```
+
+3. **Automatic Cleanup:**
+```dart
+ref.onDispose(() {
+  NfcManager.instance.stopSession();
+});
+```
+
+#### Tag Reading Logic
+
+The `_decodeTagType()` method extracts information from different tag technologies:
+
+```dart
+Map<String, String> _decodeTagType(NfcTag tag)
+```
+
+This method returns a map containing detailed tag information based on the detected technology.
+
+### UI Components
+
+#### NFC Scanner Screen (`nfc_scanner_screen.dart`)
+
+The main screen uses pattern matching to display different UI states:
+
+```dart
+nfcState.when(
+  checking: () => const NfcCheckingScreen(),
+  unavailable: () => const NfcUnsupportedScreen(),
+  disabled: () => const NfcTurnedOffScreen(),
+  scanning: () => const NfcScanningScreen(),
+  success: (details) => NfcSuccessScreen(details: details),
+  error: (message) => NfcErrorScreen(error: message),
+)
+```
+
+#### Scanning Animation (`nfc_scanning_screen.dart`)
+
+Features:
+- Custom painter showing phone with NFC area
+- Animated NFC tag approaching the phone
+- Pulsing effect on NFC area (2-second duration)
+- Tag approach animation (3-second duration)
+- Instruction text: "Place NFC tag at the back of your phone"
+
+## Usage
+
+### Navigation
+
+The NFC scanner is accessible via the app router:
+
+```dart
+GoRoute(
+  path: AppRoute.nfc.name,
+  builder: (BuildContext context, GoRouterState state) {
+    return const NfcScannerScanner();
+  },
+)
+```
+
+Navigate to `/nfc` route to access the scanner.
+
+### Reading Tags
+
+1. Navigate to the NFC scanner screen
+2. The app automatically checks NFC availability
+3. If NFC is available and enabled, scanning starts automatically
+4. Place an NFC tag near the device's NFC antenna (usually at the back)
+5. Tag details are displayed on success
+6. Use "Try Again" button to scan another tag
+
+## Supported NFC Technologies
+
+The implementation can read from 8 different NFC tag technologies:
+
+### 1. NFC-A (ISO 14443-A)
+- **Common Use:** Credit cards, access cards, smartphones
+- **Extracted Data:** UID, ATQA, SAK
+
+### 2. NFC-B (ISO 14443-B)
+- **Common Use:** Banking cards, secure access systems
+- **Extracted Data:** UID, Application Data, Protocol Info
+
+### 3. NFC-F (FeliCa - ISO 18092)
+- **Common Use:** Japanese transit cards (Suica, PASMO)
+- **Extracted Data:** UID, Manufacturer, System Code
+
+### 4. NFC-V (ISO 15693)
+- **Common Use:** Inventory systems, library books
+- **Extracted Data:** UID, Response Flags, DSFID
+
+### 5. MIFARE Classic
+- **Common Use:** Legacy access cards, public transport
+- **Extracted Data:** UID, Type, Memory Size, Block Count, Sector Count
+
+### 6. MIFARE Ultralight
+- **Common Use:** Low-cost disposable cards, event tickets
+- **Extracted Data:** UID, Type
+
+### 7. NDEF (NFC Data Exchange Format)
+- **Common Use:** Smart posters, business cards, URLs
+- **Extracted Data:** Support status, Writable flag, Max size, Type, Message availability
+
+### 8. Generic Tag Information
+- **Common Use:** Fallback for any tag
+- **Extracted Data:** UID (hex format), UID length
+
+## Troubleshooting
+
+### NFC Not Available
+
+**Symptoms:** App shows "NFC is not supported on this device"
+
+**Solutions:**
+- Verify the device has NFC hardware
+- Check that platform configurations are correct (Android manifest, iOS Info.plist)
+
+### NFC Disabled
+
+**Symptoms:** App shows "NFC is turned off"
+
+**Solutions:**
+- Tap "Open NFC" button in the app to launch device settings
+- Manually enable NFC in device settings:
+  - **Android:** Settings → Connected devices → Connection preferences → NFC
+  - **iOS:** NFC is always enabled on supported devices (iPhone 7+)
+
+### Tag Not Detected
+
+**Symptoms:** NFC is enabled but tags aren't being read
+
+**Solutions:**
+- Ensure the tag is placed at the back of the device
+- Try different positions and angles
+- Move the tag slowly closer to the device
+- Remove any thick phone cases that might interfere
+- Verify the tag is not damaged or protected
+
+### iOS-Specific Issues
+
+**Issue:** NFC not working on iOS
+
+**Solutions:**
+- Verify all Info.plist entries are correct
+- Check that FeliCa system codes are declared
+- Ensure `NFCReaderUsageDescription` is present
+- Confirm device supports NFC (iPhone 7 or later)
+
+### Android-Specific Issues
+
+**Issue:** Permission denied
+
+**Solutions:**
+- Check that NFC permission is declared in AndroidManifest.xml
+- Verify runtime permission handling (auto-granted for NFC)
+
+## Code References
+
+- Controller: `lib/nfc_scanner/services/nfc_scanner_controller.dart`
+- Main Screen: `lib/nfc_scanner/presentation/nfc_scanner_screen.dart`
+- State Definitions: `lib/nfc_scanner/domains/nfc_scanner_state.dart`
+- Scanning Animation: `lib/nfc_scanner/presentation/nfc_screen_types/nfc_scanning_screen.dart`
+- Router Configuration: `lib/router/router.dart`
+- Android MainActivity: `android/app/src/main/kotlin/com/example/mobile_playground/MainActivity.kt`
+
+## Future Enhancements
+
+Potential improvements for the NFC implementation:
+
+- [ ] NFC tag writing capability
+- [ ] NDEF message parsing and display
+- [ ] Tag history/logging
+- [ ] Export tag data
+- [ ] Custom NDEF record creation
+- [ ] Peer-to-peer NFC communication
+- [ ] Background tag reading (Android)
+- [ ] Tag emulation (HCE - Host Card Emulation)
+
+---
+
+**Last Updated:** October 2025

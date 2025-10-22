@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-class ThemeController extends StateNotifier<ThemeMode> {
-  ThemeController() : super(ThemeMode.system) {
+part 'theme_controller.g.dart';
+
+@riverpod
+class ThemeController extends _$ThemeController {
+  @override
+  ThemeMode build() {
     _loadTheme();
+    return ThemeMode.system;
   }
 
   Future<void> _loadTheme() async {
@@ -42,8 +47,3 @@ class ThemeController extends StateNotifier<ThemeMode> {
     }
   }
 }
-
-final themeControllerProvider =
-    StateNotifierProvider<ThemeController, ThemeMode>(
-  (ref) => ThemeController(),
-);

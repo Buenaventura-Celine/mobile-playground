@@ -10,28 +10,26 @@ This repository serves as a sandbox for mobile development experimentation and l
 
 ### 🚀 CI/CD Pipeline Implementation
 
-**First major milestone**: Successfully implemented a comprehensive CI/CD pipeline using GitHub Actions.
+Automated GitHub Actions pipeline for continuous integration and deployment.
 
-**Implementation Details:**
+**Features:**
+- Automated code quality checks (formatting, analysis, tests)
+- Coverage reporting with Codecov
+- Automated Android builds on version tags
+- GitHub release creation with APK and App Bundle artifacts
 
-- **Continuous Integration (CI)**: 
-  - Triggers on every push and pull request to `main` branch
-  - Automated code quality checks including formatting and static analysis
-  - Comprehensive test suite execution with coverage reporting
-  - Integration with Codecov for coverage tracking
+### 📱 NFC Scanning Feature
 
-- **Continuous Deployment (CD)**:
-  - Triggers on version tags (e.g., `v1.0.0`)
-  - Automated Android APK and App Bundle builds
-  - Automatic GitHub release creation with build artifacts
-  - Ready-to-install APK files for direct distribution
-  - App Bundle files prepared for Google Play Store deployment
+Multi-platform NFC tag reader supporting 8 different tag technologies.
 
-**Workflow Features:**
-- Flutter 3.24.0 stable channel
-- Java 17 setup for Android builds
-- Automated testing before deployment
-- Release asset uploads with versioned naming
+**Features:**
+- Support for ISO 14443, ISO 15693, ISO 18092, MIFARE, and NDEF
+- Animated scanning UI with real-time feedback
+- Automatic availability detection and error handling
+- Android foreground dispatch for priority NFC handling
+- Riverpod state management with clean architecture
+
+**Documentation:** [`lib/nfc_scanner/docs/NFC_IMPLEMENTATION.md`](lib/nfc_scanner/docs/NFC_IMPLEMENTATION.md)
 
 ## 🛠 Getting Started
 

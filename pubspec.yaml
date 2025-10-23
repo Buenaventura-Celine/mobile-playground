@@ -50,6 +50,7 @@ dependencies:
   # Code generation
   freezed_annotation: ^3.0.0
   json_annotation: ^4.9.0
+  google_maps_flutter: ^2.13.1
  
   
 dev_dependencies:

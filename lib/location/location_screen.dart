@@ -223,6 +223,7 @@ class _LocationScreenState extends State<LocationScreen> {
           child: GooglePlaceAutoCompleteTextField(
             textEditingController: _searchController,
             googleAPIKey: dotenv.env['GOOGLE_MAPS_API_KEY'] ?? '',
+            isCrossBtnShown: !_searchController.text.isNotEmpty,
             inputDecoration: InputDecoration(
               hintText: 'Search location',
               hintStyle: TextStyle(

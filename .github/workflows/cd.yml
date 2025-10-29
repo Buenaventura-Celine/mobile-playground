@@ -26,7 +26,13 @@ jobs:
       with:
         flutter-version: '3.35.6'
         channel: 'stable'
-    
+
+    - name: Create .env file
+      run: |
+        cat << EOF > .env
+        GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}
+        EOF
+
     - name: Install dependencies
       run: flutter pub get
     

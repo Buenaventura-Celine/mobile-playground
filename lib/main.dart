@@ -3,8 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile_playground/router/router.dart';
 import 'package:mobile_playground/theme/app_theme.dart';
 import 'package:mobile_playground/theme/theme_controller.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-void main() {
+Future<void> main() async {
+  await dotenv.load(fileName: ".env");
   runApp(
     const ProviderScope(
       child: MyApp(),

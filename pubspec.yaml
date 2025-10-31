@@ -57,6 +57,7 @@ dependencies:
   flutter_dotenv: ^5.2.1
   geolocator: ^13.0.2
   google_places_flutter: ^2.0.9
+  flutter_launcher_icons: ^0.14.4
 
   
 dev_dependencies:
@@ -118,4 +119,11 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/logo.png"
+  adaptive_icon_foreground: "assets/logo_foreground.png"
+  adaptive_icon_background: "#FFFFFF"
 

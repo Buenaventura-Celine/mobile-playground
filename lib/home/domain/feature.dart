@@ -26,18 +26,18 @@ final List<Feature> features = [
     route: '/${AppRoute.nfc.name}',
   ),
   Feature(
-    title: 'Camera',
-    description: 'Take photos and videos',
-    icon: Icons.camera_alt,
-    color: Colors.green,
-    route: '/${AppRoute.camera.name}',
-  ),
-  Feature(
     title: 'Location',
     description: 'GPS and location services',
     icon: Icons.location_on,
     color: Colors.red,
     route: '/${AppRoute.location.name}',
+  ),
+  Feature(
+    title: 'Camera',
+    description: 'Take photos and videos',
+    icon: Icons.camera_alt,
+    color: Colors.green,
+    route: '/${AppRoute.camera.name}',
   ),
   Feature(
     title: 'Sensors',

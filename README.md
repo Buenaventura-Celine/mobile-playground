@@ -31,6 +31,28 @@ Multi-platform NFC tag reader supporting 8 different tag technologies.
 
 **Documentation:** [`lib/nfc_scanner/docs/NFC_IMPLEMENTATION.md`](lib/nfc_scanner/docs/NFC_IMPLEMENTATION.md)
 
+### 🗺️ Location & Maps Feature
+
+Interactive map interface with real-time location tracking and turn-by-turn directions.
+
+**Features:**
+- Real-time user location detection with permission handling
+- Google Maps integration with custom markers and polylines
+- Place search with autocomplete suggestions
+- Route calculation using Google Directions API
+- Animated camera movements to fit routes
+- Dotted polyline route visualization
+- Service-oriented architecture for maintainability
+
+**Technologies:**
+- Google Maps Flutter SDK
+- Geolocator for device location
+- Google Places API for autocomplete
+- Google Directions API for routing
+- Geocoding for address conversion
+
+**Documentation:** [`docs/location/location-implementation.md`](docs/location/location-implementation.md)
+
 ## 🛠 Getting Started
 
 ### Prerequisites
@@ -51,6 +73,26 @@ flutter pub get
 # Run the app
 flutter run
 ```
+
+### Configuration
+
+#### Google Maps API Key Setup
+
+For the location feature to work, you need to set up a Google Maps API key:
+
+1. Create a `.env` file in the project root:
+```bash
+GOOGLE_MAPS_API_KEY=your_api_key_here
+```
+
+2. Enable the following APIs in Google Cloud Console:
+   - Maps SDK for Android
+   - Maps SDK for iOS
+   - Directions API
+   - Places API
+   - Geocoding API
+
+3. See the [location implementation documentation](docs/location/location-implementation.md) for detailed setup instructions.
 
 ### Development Commands
 ```bash

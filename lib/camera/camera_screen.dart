@@ -11,6 +11,7 @@ import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 /// Camera example home widget.
 class CameraScreen extends StatefulWidget {
@@ -68,6 +69,11 @@ class _CameraScreenState extends State<CameraScreen>
   // Counting pointers (number of user fingers on screen)
   int _pointers = 0;
 
+  // List of available cameras
+  List<CameraDescription> _cameras = <CameraDescription>[];
+  bool _permissionGranted = false;
+  bool _isLoadingCamera = true;
+
   @override
   void initState() {
     super.initState();
@@ -97,6 +103,64 @@ class _CameraScreenState extends State<CameraScreen>
       parent: _focusModeControlRowAnimationController,
       curve: Curves.easeInCubic,
     );
+
+    // Request camera permission and initialize cameras
+    _requestCameraPermission();
+  }
+
+  Future<void> _requestCameraPermission() async {
+    final status = await Permission.camera.request();
+
+    if (status.isGranted) {
+      setState(() {
+        _permissionGranted = true;
+      });
+      await _initializeCameras();
+    } else if (status.isDenied) {
+      setState(() {
+        _permissionGranted = false;
+        _isLoadingCamera = false;
+      });
+      if (mounted) {
+        showInSnackBar('Camera permission is required to use this feature.');
+      }
+    } else if (status.isPermanentlyDenied) {
+      setState(() {
+        _permissionGranted = false;
+        _isLoadingCamera = false;
+      });
+      if (mounted) {
+        showInSnackBar('Camera permission permanently denied. Please enable it in settings.');
+      }
+    }
+  }
+
+  Future<void> _initializeCameras() async {
+    try {
+      _cameras = await availableCameras();
+      if (_cameras.isNotEmpty && mounted) {
+        // Initialize with the first camera (usually back camera)
+        await _initializeCameraController(_cameras[0]);
+      }
+      setState(() {
+        _isLoadingCamera = false;
+      });
+    } on CameraException catch (e) {
+      _logError(e.code, e.description);
+      setState(() {
+        _isLoadingCamera = false;
+      });
+      if (mounted) {
+        showInSnackBar('Failed to get cameras: ${e.description}');
+      }
+    } catch (e) {
+      setState(() {
+        _isLoadingCamera = false;
+      });
+      if (mounted) {
+        showInSnackBar('Failed to initialize cameras: $e');
+      }
+    }
   }
 
   @override
@@ -168,6 +232,49 @@ class _CameraScreenState extends State<CameraScreen>
   /// Display the preview from the camera (or a message if the preview is not available).
   Widget _cameraPreviewWidget() {
     final CameraController? cameraController = controller;
+
+    if (_isLoadingCamera) {
+      return const Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          CircularProgressIndicator(color: Colors.white),
+          SizedBox(height: 16),
+          Text(
+            'Loading camera...',
+            style: TextStyle(color: Colors.white, fontSize: 16),
+          ),
+        ],
+      );
+    }
+
+    if (!_permissionGranted) {
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.camera_alt, color: Colors.white, size: 64),
+          const SizedBox(height: 16),
+          const Text(
+            'Camera permission required',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'Please grant camera permission to use this feature',
+            style: TextStyle(color: Colors.white70, fontSize: 14),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: _requestCameraPermission,
+            child: const Text('Request Permission'),
+          ),
+        ],
+      );
+    }
 
     if (cameraController == null || !cameraController.value.isInitialized) {
       return const Text(
@@ -527,8 +634,6 @@ class _CameraScreenState extends State<CameraScreen>
 
   /// Display a row of toggle to select the camera (or a message if no camera is available).
   Widget _cameraTogglesRowWidget() {
-    final List<Widget> toggles = <Widget>[];
-
     void onChanged(CameraDescription? description) {
       if (description == null) {
         return;
@@ -542,20 +647,6 @@ class _CameraScreenState extends State<CameraScreen>
         showInSnackBar('No camera found.');
       });
       return const Text('None');
-    } else {
-      for (final CameraDescription cameraDescription in _cameras) {
-        toggles.add(
-          SizedBox(
-            width: 90.0,
-            child: RadioListTile<CameraDescription>(
-              title: Icon(getCameraLensIcon(cameraDescription.lensDirection)),
-              value: cameraDescription,
-              groupValue: null,
-              onChanged: (CameraDescription? value) {},
-            ),
-          ),
-        );
-      }
     }
 
     return Expanded(
@@ -563,14 +654,21 @@ class _CameraScreenState extends State<CameraScreen>
         height: 56.0,
         child: ListView.builder(
           scrollDirection: Axis.horizontal,
-          itemCount: cameras.length, // your camera list
+          itemCount: _cameras.length,
           itemBuilder: (context, index) {
-            final camera = cameras[index];
-            return RadioListTile<CameraDescription>(
-              title: Text(camera.name),
-              value: camera,
-              groupValue: controller?.description,
-              onChanged: onChanged,
+            final camera = _cameras[index];
+            return SizedBox(
+              width: 150.0,
+              child: RadioListTile<CameraDescription>(
+                title: Text(
+                  camera.name,
+                  style: const TextStyle(fontSize: 12),
+                  overflow: TextOverflow.ellipsis,
+                ),
+                value: camera,
+                groupValue: controller?.description,
+                onChanged: onChanged,
+              ),
             );
           },
         ),

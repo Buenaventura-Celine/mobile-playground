@@ -14,13 +14,13 @@ import 'package:flutter/scheduler.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 /// Camera example home widget.
-class CameraScreen extends StatefulWidget {
+class DocumentScanner extends StatefulWidget {
   /// Default Constructor
-  const CameraScreen({super.key});
+  const DocumentScanner({super.key});
 
   @override
-  State<CameraScreen> createState() {
-    return _CameraScreenState();
+  State<DocumentScanner> createState() {
+    return _DocumentScannerState();
   }
 }
 
@@ -45,7 +45,7 @@ void _logError(String code, String? message) {
   print('Error: $code${message == null ? '' : '\nError Message: $message'}');
 }
 
-class _CameraScreenState extends State<CameraScreen>
+class _DocumentScannerState extends State<DocumentScanner>
     with WidgetsBindingObserver, TickerProviderStateMixin {
   CameraController? controller;
   XFile? imageFile;
@@ -1072,7 +1072,7 @@ class CameraApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(home: CameraScreen());
+    return const MaterialApp(home: DocumentScanner());
   }
 }
 

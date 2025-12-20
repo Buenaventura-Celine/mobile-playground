@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../domain/document_scanner_state.dart';
 import '../services/document_scanner_controller.dart';
+import 'screens/camera_preview_screen.dart';
+import 'screens/preview_screen.dart';
 
 /// Main entry point for the document scanner feature.
 /// Routes to different screens based on the current state.
@@ -15,13 +17,13 @@ class DocumentScannerScreen extends ConsumerWidget {
 
     return state.when(
       checking: () => const _CheckingScreen(),
-      ready: (camera, flashMode, zoom) => _ReadyPlaceholder(
-        cameraDescription: camera,
+      ready: (camera, flashMode, zoom) => CameraPreviewScreen(
+        selectedCamera: camera,
         flashMode: flashMode,
         zoomLevel: zoom,
       ),
       capturing: () => const _CapturingScreen(),
-      preview: (imageFile) => _PreviewPlaceholder(imageFile: imageFile),
+      preview: (imageFile) => PreviewScreen(imageFile: imageFile),
       processing: () => const _ProcessingScreen(),
       error: (message) => _ErrorScreen(message: message),
     );
@@ -66,72 +68,6 @@ class _CheckingScreen extends StatelessWidget {
   }
 }
 
-/// Placeholder for ready state (camera preview will go here in Phase 5)
-class _ReadyPlaceholder extends StatelessWidget {
-  final dynamic cameraDescription;
-  final dynamic flashMode;
-  final double zoomLevel;
-
-  const _ReadyPlaceholder({
-    required this.cameraDescription,
-    required this.flashMode,
-    required this.zoomLevel,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFF1A1A2E), Color(0xFF16213E)],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(
-                Icons.camera_alt,
-                color: Colors.white,
-                size: 64,
-              ),
-              const SizedBox(height: 24),
-              const Text(
-                'Camera Ready',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Zoom: ${zoomLevel.toStringAsFixed(1)}x',
-                style: const TextStyle(
-                  color: Colors.grey,
-                  fontSize: 14,
-                ),
-              ),
-              const SizedBox(height: 32),
-              const Text(
-                '(Camera preview coming in Phase 5)',
-                style: TextStyle(
-                  color: Colors.amber,
-                  fontSize: 12,
-                  fontStyle: FontStyle.italic,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 /// Screen shown while capturing an image
 class _CapturingScreen extends StatelessWidget {
   const _CapturingScreen();
@@ -165,58 +101,6 @@ class _CapturingScreen extends StatelessWidget {
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 16,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Placeholder for preview state (image confirmation will go here in Phase 5)
-class _PreviewPlaceholder extends StatelessWidget {
-  final dynamic imageFile;
-
-  const _PreviewPlaceholder({required this.imageFile});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFF1A1A2E), Color(0xFF16213E)],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
-        child: const Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.image,
-                color: Colors.white,
-                size: 64,
-              ),
-              SizedBox(height: 24),
-              Text(
-                'Image Captured',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              SizedBox(height: 32),
-              Text(
-                '(Preview screen coming in Phase 5)',
-                style: TextStyle(
-                  color: Colors.amber,
-                  fontSize: 12,
-                  fontStyle: FontStyle.italic,
                 ),
               ),
             ],

@@ -792,15 +792,417 @@ state = state.maybeWhen(
 
 ---
 
-## Next Steps After Phase 6
+---
 
-Once the basic refactoring is complete, consider these enhancements:
+## Phase 7: Document Processing - Detection, Correction & Enhancement
 
-### Phase 7: ML Kit Integration (Optional)
-- Add `google_mlkit_document_scanner` or `google_mlkit_vision`
-- Edge detection for document boundaries
-- Perspective correction
-- Automatic crop detection
+**Duration:** ~3 hours
+**Deliverables:** Document detection, perspective correction, image enhancement services, visual frame guide
+**Dependencies:** Phases 1-6 complete
+**Status:** ✅ COMPLETE
+
+This phase transforms the app from a basic camera into a true document scanner by adding intelligent document processing capabilities.
+
+### What Was Implemented
+- ✅ Document detection (edge detection + corner finding)
+- ✅ Perspective correction (cropping to detected corners)
+- ✅ Image enhancement (contrast + normalization)
+- ✅ Frame guide (visual overlay with corner markers)
+
+### Step 7.1: Create Document Detection Service
+
+**File:** `lib/document_scanner/services/document_detection_service.dart`
+
+Detect document boundaries (corners/edges) in images using edge detection.
+
+**What to include:**
+```dart
+import 'package:image/image.dart' as img;
+
+class DocumentDetectionService {
+  /// Detect document corners in an image
+  /// Returns list of corner coordinates (top-left, top-right, bottom-right, bottom-left)
+  Future<List<Offset>?> detectDocumentCorners(String imagePath) async {
+    try {
+      final imageBytes = await File(imagePath).readAsBytes();
+      final image = img.decodeImage(imageBytes);
+      if (image == null) return null;
+
+      // Convert to grayscale
+      final gray = _toGrayscale(image);
+
+      // Apply Canny edge detection
+      final edges = _cannyEdgeDetection(gray);
+
+      // Find contours and detect document shape
+      final corners = _findDocumentCorners(edges, image.width, image.height);
+
+      return corners;
+    } catch (e) {
+      throw Exception('Failed to detect document corners: $e');
+    }
+  }
+
+  /// Check if image contains a valid document (area > threshold)
+  bool _isValidDocument(List<Offset> corners) {
+    if (corners.length != 4) return false;
+
+    // Calculate area using cross product
+    final area = _calculatePolygonArea(corners);
+    const minArea = 10000; // Minimum area threshold
+
+    return area > minArea;
+  }
+
+  // Helper methods...
+  List<int> _toGrayscale(img.Image image) {
+    // Implementation
+  }
+
+  List<int> _cannyEdgeDetection(List<int> gray) {
+    // Implementation
+  }
+
+  List<Offset> _findDocumentCorners(List<int> edges, int width, int height) {
+    // Implementation
+  }
+
+  double _calculatePolygonArea(List<Offset> points) {
+    // Implementation
+  }
+}
+```
+
+**Key Points:**
+- Detect 4 corners of documents in images
+- Return corner coordinates as Offset points
+- Handle various document sizes and angles
+- Gracefully fail for images without documents
+
+### Step 7.2: Create Perspective Correction Service
+
+**File:** `lib/document_scanner/services/perspective_correction_service.dart`
+
+Transform skewed document images to be straight and readable.
+
+**What to include:**
+```dart
+import 'package:image/image.dart' as img;
+
+class PerspectiveCorrectionService {
+  /// Apply perspective transform to straighten document
+  /// Returns corrected image file path
+  Future<String> correctPerspective({
+    required String imagePath,
+    required List<Offset> corners,
+    int? outputWidth,
+    int? outputHeight,
+  }) async {
+    try {
+      final imageBytes = await File(imagePath).readAsBytes();
+      final image = img.decodeImage(imageBytes);
+      if (image == null) throw Exception('Could not decode image');
+
+      // Apply perspective transform using corners
+      final corrected = _applyPerspectiveTransform(
+        image,
+        corners,
+        outputWidth ?? image.width,
+        outputHeight ?? image.height,
+      );
+
+      // Save corrected image
+      final correctedPath = _getSavePathForCorrected(imagePath);
+      await File(correctedPath).writeAsBytes(img.encodePng(corrected));
+
+      return correctedPath;
+    } catch (e) {
+      throw Exception('Failed to correct perspective: $e');
+    }
+  }
+
+  /// Apply 4-point perspective transform
+  img.Image _applyPerspectiveTransform(
+    img.Image image,
+    List<Offset> corners,
+    int outputWidth,
+    int outputHeight,
+  ) {
+    // Use inverse warping or similar algorithm
+    // Implementation
+  }
+
+  String _getSavePathForCorrected(String originalPath) {
+    // Return path with "_corrected" suffix
+  }
+}
+```
+
+**Key Points:**
+- Takes detected corners and transforms the image
+- Straightens skewed/angled document photos
+- Maintains document aspect ratio
+- Returns new corrected image path
+
+### Step 7.3: Create Image Enhancement Service
+
+**File:** `lib/document_scanner/services/image_enhancement_service.dart`
+
+Improve image quality for better OCR and readability.
+
+**What to include:**
+```dart
+import 'package:image/image.dart' as img;
+
+class ImageEnhancementService {
+  /// Enhance image for better readability
+  /// Adjusts contrast, brightness, and applies sharpening
+  Future<String> enhanceImage(String imagePath) async {
+    try {
+      final imageBytes = await File(imagePath).readAsBytes();
+      var image = img.decodeImage(imageBytes);
+      if (image == null) throw Exception('Could not decode image');
+
+      // Apply enhancements sequentially
+      image = _adjustContrast(image, 1.2);
+      image = _adjustBrightness(image, 1.1);
+      image = _sharpen(image);
+      image = _reduceNoise(image);
+
+      // Save enhanced image
+      final enhancedPath = _getSavePathForEnhanced(imagePath);
+      await File(enhancedPath).writeAsBytes(img.encodePng(image));
+
+      return enhancedPath;
+    } catch (e) {
+      throw Exception('Failed to enhance image: $e');
+    }
+  }
+
+  /// Increase contrast to make text pop
+  img.Image _adjustContrast(img.Image image, double factor) {
+    // Implementation
+  }
+
+  /// Adjust brightness
+  img.Image _adjustBrightness(img.Image image, double factor) {
+    // Implementation
+  }
+
+  /// Apply unsharp mask for sharpness
+  img.Image _sharpen(img.Image image) {
+    // Implementation
+  }
+
+  /// Reduce noise while preserving edges
+  img.Image _reduceNoise(img.Image image) {
+    // Bilateral filter or similar
+    // Implementation
+  }
+
+  String _getSavePathForEnhanced(String originalPath) {
+    // Return path with "_enhanced" suffix
+  }
+}
+```
+
+**Key Points:**
+- Improve document image quality
+- Enhance contrast for text recognition
+- Apply sharpening filters
+- Reduce noise and artifacts
+- Returns enhanced image path
+
+### Step 7.4: Update Controller for Document Processing
+
+**File:** `lib/document_scanner/services/document_scanner_controller.dart` (update)
+
+Add document processing to the capture flow.
+
+**Add these to the controller:**
+```dart
+class DocumentScannerController extends Notifier<DocumentScannerState> {
+  late DocumentDetectionService _detectionService;
+  late PerspectiveCorrectionService _correctionService;
+  late ImageEnhancementService _enhancementService;
+
+  @override
+  DocumentScannerState build() {
+    // ... existing code ...
+
+    _detectionService = DocumentDetectionService();
+    _correctionService = PerspectiveCorrectionService();
+    _enhancementService = ImageEnhancementService();
+
+    ref.onDispose(() {
+      _cleanup();
+    });
+
+    return const DocumentScannerState.checking();
+  }
+
+  Future<void> captureImage() async {
+    // Existing capture code...
+    state = const DocumentScannerState.capturing();
+
+    try {
+      final imageFile = await _cameraService.captureImage();
+
+      // NEW: Process document
+      state = const DocumentScannerState.processing();
+      final processedPath = await _processDocument(imageFile.path);
+
+      if (!ref.mounted) return;
+
+      // Use processed image in preview
+      state = DocumentScannerState.preview(XFile(processedPath));
+    } catch (e) {
+      if (!ref.mounted) return;
+      state = DocumentScannerState.error('Failed to capture image: ${_formatError(e)}');
+    }
+  }
+
+  /// Process document: detect → correct → enhance
+  Future<String> _processDocument(String imagePath) async {
+    try {
+      // Step 1: Detect document corners
+      final corners = await _detectionService.detectDocumentCorners(imagePath);
+
+      String processedPath = imagePath;
+
+      // Step 2: Correct perspective if document detected
+      if (corners != null && corners.length == 4) {
+        processedPath = await _correctionService.correctPerspective(
+          imagePath: processedPath,
+          corners: corners,
+        );
+      }
+
+      // Step 3: Enhance image for readability
+      processedPath = await _enhancementService.enhanceImage(processedPath);
+
+      return processedPath;
+    } catch (e) {
+      // If processing fails, return original image
+      return imagePath;
+    }
+  }
+}
+```
+
+**Key Points:**
+- Document processing happens after capture
+- Shows `processing()` state during enhancement
+- Gracefully handles failures (returns original image)
+- Services are created once in `build()`
+- Processing runs before preview display
+
+### Step 7.5: Update Camera Preview for Document Guides
+
+**File:** `lib/document_scanner/presentation/screens/camera_preview_screen.dart` (update)
+
+Add visual guide for proper document positioning.
+
+**Add frame guide overlay:**
+```dart
+class _DocumentFrameGuide extends StatelessWidget {
+  const _DocumentFrameGuide();
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      painter: DocumentFramePainter(),
+      size: Size.infinite,
+    );
+  }
+}
+
+class DocumentFramePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    // Draw corner markers
+    final paint = Paint()
+      ..color = Colors.green
+      ..strokeWidth = 3
+      ..style = PaintingStyle.stroke;
+
+    // Draw frame outline with rounded corners
+    final rect = Rect.fromLTWH(
+      size.width * 0.1,
+      size.height * 0.2,
+      size.width * 0.8,
+      size.height * 0.6,
+    );
+
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(rect, Radius.circular(8)),
+      paint,
+    );
+
+    // Draw corner guides
+    final cornerSize = 40.0;
+    final corners = [
+      rect.topLeft,
+      rect.topRight,
+      rect.bottomRight,
+      rect.bottomLeft,
+    ];
+
+    for (final corner in corners) {
+      canvas.drawCircle(corner, 6, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(DocumentFramePainter oldDelegate) => false;
+}
+```
+
+**Add to camera preview:**
+```dart
+Stack(
+  children: [
+    CameraPreview(_cameraController),
+    // Add frame guide
+    const _DocumentFrameGuide(),
+    // Rest of controls...
+  ],
+)
+```
+
+### Step 7.6: Update Dependencies
+
+Add to `pubspec.yaml`:
+```yaml
+dependencies:
+  image: ^4.0.0
+  opencv_dart: ^1.0.0  # Optional: for advanced edge detection
+```
+
+Run:
+```bash
+flutter pub get
+```
+
+### Step 7.7: Validation Checklist
+
+After implementing Phase 7, verify:
+
+- [ ] Document detection works on various document angles
+- [ ] Perspective correction straightens skewed documents
+- [ ] Image enhancement improves contrast/sharpness
+- [ ] Frame guide appears on camera preview
+- [ ] Processing state shows during enhancement
+- [ ] App gracefully handles edge cases (no document detected)
+- [ ] Original image returned if processing fails
+- [ ] Performance acceptable (processing < 2 seconds)
+- [ ] Memory usage doesn't spike during processing
+
+---
+
+## Next Steps After Phase 7
+
+Once document processing is complete:
 
 ### Phase 8: Advanced Export (Optional)
 - PDF generation using `pdf` package
@@ -813,6 +1215,11 @@ Once the basic refactoring is complete, consider these enhancements:
 - Thumbnail generation
 - Batch operations
 - Offline sync support
+
+### Phase 10: ML Kit Integration (Optional)
+- OCR using `google_ml_kit`
+- Extract text from documents
+- Auto-categorize documents
 
 ---
 

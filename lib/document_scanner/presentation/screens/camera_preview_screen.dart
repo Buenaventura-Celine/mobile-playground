@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../services/document_scanner_controller.dart';
 
 /// Screen displaying live camera feed with capture and control buttons
-class CameraPreviewScreen extends ConsumerStatefulWidget {
+class CameraPreviewScreen extends ConsumerWidget {
   final CameraDescription selectedCamera;
   final FlashMode flashMode;
   final double zoomLevel;
@@ -18,106 +18,12 @@ class CameraPreviewScreen extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<CameraPreviewScreen> createState() => _CameraPreviewScreenState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final controller = ref.watch(documentScannerControllerProvider.notifier);
+    final cameraController = controller.cameraController;
+    final isInitialized = controller.isCameraInitialized;
 
-class _CameraPreviewScreenState extends ConsumerState<CameraPreviewScreen> {
-  late CameraController _cameraController;
-  bool _isCameraInitialized = false;
-  double _currentZoom = 1.0;
-  bool _isFlashOn = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _initializeCamera();
-  }
-
-  Future<void> _initializeCamera() async {
-    try {
-      _cameraController = CameraController(
-        widget.selectedCamera,
-        ResolutionPreset.high,
-        enableAudio: false,
-      );
-
-      await _cameraController.initialize();
-      _currentZoom = 1.0;
-
-      if (mounted) {
-        setState(() {
-          _isCameraInitialized = true;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to initialize camera: $e')),
-        );
-      }
-    }
-  }
-
-  @override
-  void dispose() {
-    _cameraController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _handleCapture() async {
-    if (!_isCameraInitialized || _cameraController.value.isTakingPicture) {
-      return;
-    }
-
-    try {
-      await ref.read(documentScannerControllerProvider.notifier).captureImage();
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to capture image: $e')),
-        );
-      }
-    }
-  }
-
-  Future<void> _handleFlashToggle() async {
-    final newFlashMode = _isFlashOn ? FlashMode.off : FlashMode.torch;
-    try {
-      await ref.read(documentScannerControllerProvider.notifier).setFlashMode(newFlashMode);
-      if (mounted) {
-        setState(() {
-          _isFlashOn = !_isFlashOn;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to set flash: $e')),
-        );
-      }
-    }
-  }
-
-  Future<void> _handleZoomChange(double zoom) async {
-    try {
-      await ref.read(documentScannerControllerProvider.notifier).setZoom(zoom);
-      if (mounted) {
-        setState(() {
-          _currentZoom = zoom;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to set zoom: $e')),
-        );
-      }
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (!_isCameraInitialized) {
+    if (!isInitialized || cameraController == null) {
       return Scaffold(
         body: Container(
           decoration: const BoxDecoration(
@@ -136,13 +42,99 @@ class _CameraPreviewScreenState extends ConsumerState<CameraPreviewScreen> {
       );
     }
 
+    return _CameraPreviewContent(
+      cameraController: cameraController,
+      controller: controller,
+    );
+  }
+}
+
+class _CameraPreviewContent extends StatefulWidget {
+  final CameraController cameraController;
+  final DocumentScannerController controller;
+
+  const _CameraPreviewContent({
+    required this.cameraController,
+    required this.controller,
+  });
+
+  @override
+  State<_CameraPreviewContent> createState() => _CameraPreviewContentState();
+}
+
+class _CameraPreviewContentState extends State<_CameraPreviewContent> {
+  double _currentZoom = 1.0;
+  bool _isFlashOn = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentZoom = 1.0;
+  }
+
+  Future<void> _handleCapture() async {
+    if (widget.cameraController.value.isTakingPicture) {
+      return;
+    }
+
+    try {
+      await widget.controller.captureImage();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to capture image: $e')),
+        );
+      }
+    }
+  }
+
+  Future<void> _handleFlashToggle() async {
+    final newFlashMode = _isFlashOn ? FlashMode.off : FlashMode.torch;
+    try {
+      await widget.controller.setFlashMode(newFlashMode);
+      if (mounted) {
+        setState(() {
+          _isFlashOn = !_isFlashOn;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to set flash: $e')),
+        );
+      }
+    }
+  }
+
+  Future<void> _handleZoomChange(double zoom) async {
+    try {
+      await widget.controller.setZoom(zoom);
+      if (mounted) {
+        setState(() {
+          _currentZoom = zoom;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to set zoom: $e')),
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: [
-          // Camera preview
+          // Camera preview - use the controller's camera
           SizedBox.expand(
-            child: CameraPreview(_cameraController),
+            child: CameraPreview(widget.cameraController),
           ),
+
+          // Document frame guide overlay
+          const _DocumentFrameGuide(),
 
           // Overlay controls
           SafeArea(
@@ -276,4 +268,81 @@ class _CameraPreviewScreenState extends ConsumerState<CameraPreviewScreen> {
       ),
     );
   }
+}
+
+/// Document frame guide overlay for proper positioning
+class _DocumentFrameGuide extends StatelessWidget {
+  const _DocumentFrameGuide();
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      painter: DocumentFramePainter(),
+      size: Size.infinite,
+    );
+  }
+}
+
+/// Painter that draws the document frame guide
+class DocumentFramePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    // Draw corner markers
+    final framePaint = Paint()
+      ..color = Colors.green
+      ..strokeWidth = 3
+      ..style = PaintingStyle.stroke;
+
+    // Define document frame area (80% of screen centered)
+    final frameRect = Rect.fromLTWH(
+      size.width * 0.1,
+      size.height * 0.15,
+      size.width * 0.8,
+      size.height * 0.7,
+    );
+
+    // Draw frame outline
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(frameRect, const Radius.circular(8)),
+      framePaint,
+    );
+
+    // Draw corner guides
+    final corners = [
+      frameRect.topLeft,
+      frameRect.topRight,
+      frameRect.bottomRight,
+      frameRect.bottomLeft,
+    ];
+
+    for (final corner in corners) {
+      // Draw corner circles
+      canvas.drawCircle(corner, 6, framePaint);
+    }
+
+    // Draw helper text
+    final textPainter = TextPainter(
+      text: const TextSpan(
+        text: 'Position document within frame',
+        style: TextStyle(
+          color: Colors.green,
+          fontSize: 14,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    );
+
+    textPainter.layout();
+    textPainter.paint(
+      canvas,
+      Offset(
+        size.width / 2 - textPainter.width / 2,
+        frameRect.bottom + 20,
+      ),
+    );
+  }
+
+  @override
+  bool shouldRepaint(DocumentFramePainter oldDelegate) => false;
 }

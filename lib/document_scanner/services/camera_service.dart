@@ -117,6 +117,9 @@ class CameraService {
   /// Get the underlying CameraController widget
   CameraController? get controller => _controller;
 
+  /// Check if a controller exists and is initialized
+  bool get hasInitializedCamera => _controller != null && _controller!.value.isInitialized;
+
   /// Get minimum available zoom level
   double get minZoom => 1.0; // Camera typically starts at 1.0x zoom
 

@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/repositories/document_repository.dart';
-import '../document_screen_template.dart';
 
 /// Screen for confirming or retaking a captured image
 class PreviewScreen extends ConsumerStatefulWidget {
@@ -102,24 +101,41 @@ class _PreviewScreenState extends ConsumerState<PreviewScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFF1A1A2E), Color(0xFF16213E)],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              // Image preview
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
+      backgroundColor: colorScheme.surface,
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Header
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(
+                'Confirm Image',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      color: colorScheme.onSurface,
+                    ),
+              ),
+            ),
+
+            // Image preview
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: colorScheme.shadow.withValues(alpha: 0.2),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
                     child: Image.file(
                       File(widget.imageFile.path),
                       fit: BoxFit.cover,
@@ -127,63 +143,148 @@ class _PreviewScreenState extends ConsumerState<PreviewScreen> {
                   ),
                 ),
               ),
+            ),
 
-              // Info card
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Column(
-                  children: [
-                    DocumentInfoCard(
-                      label: 'File Size',
-                      value: _formatFileSize(_imageSize),
-                      icon: Icons.storage,
+            // Info cards
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Column(
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      color: colorScheme.surfaceContainer,
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    const SizedBox(height: 16),
-                    DocumentInfoCard(
-                      label: 'Date Captured',
-                      value: DateTime.now().toString().split('.')[0],
-                      icon: Icons.calendar_today,
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      children: [
+                        _InfoRow(
+                          icon: Icons.storage,
+                          label: 'File Size',
+                          value: _formatFileSize(_imageSize),
+                          colorScheme: colorScheme,
+                        ),
+                        const SizedBox(height: 12),
+                        _InfoRow(
+                          icon: Icons.calendar_today,
+                          label: 'Date Captured',
+                          value: DateTime.now().toString().split('.')[0],
+                          colorScheme: colorScheme,
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
+            ),
 
-              const SizedBox(height: 32),
+            const SizedBox(height: 32),
 
-              // Action buttons
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Column(
-                  children: [
-                    // Confirm button
-                    DocumentActionButton(
-                      label: _isSaving ? 'Saving...' : 'Confirm & Save',
-                      onPressed: _isSaving ? () {} : _handleConfirm,
-                      backgroundColor: DocumentScreenColors.success,
-                      textColor: Colors.white,
-                      isLoading: _isSaving,
-                      icon: Icons.check,
+            // Action buttons
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Column(
+                children: [
+                  // Confirm button
+                  SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: FilledButton.icon(
+                      onPressed: _isSaving ? null : _handleConfirm,
+                      icon: _isSaving
+                          ? SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  colorScheme.onPrimary,
+                                ),
+                              ),
+                            )
+                          : const Icon(Icons.check),
+                      label: Text(
+                        _isSaving ? 'Saving...' : 'Confirm & Save',
+                      ),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: colorScheme.primary,
+                      ),
                     ),
+                  ),
 
-                    const SizedBox(height: 12),
+                  const SizedBox(height: 12),
 
-                    // Retake button
-                    DocumentSecondaryButton(
-                      label: 'Retake',
-                      onPressed: _isSaving ? () {} : _handleRetake,
-                      borderColor: Colors.grey,
-                      textColor: Colors.white,
-                      icon: Icons.refresh,
+                  // Retake button
+                  SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: OutlinedButton.icon(
+                      onPressed: _isSaving ? null : _handleRetake,
+                      icon: const Icon(Icons.refresh),
+                      label: const Text('Retake'),
+                      style: OutlinedButton.styleFrom(
+                        side: BorderSide(
+                          color: colorScheme.outlineVariant,
+                        ),
+                        foregroundColor: colorScheme.onSurface,
+                      ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
+            ),
 
-              const SizedBox(height: 24),
-            ],
-          ),
+            const SizedBox(height: 24),
+          ],
         ),
       ),
+    );
+  }
+}
+
+/// Simple info row widget for displaying file details
+class _InfoRow extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+  final ColorScheme colorScheme;
+
+  const _InfoRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.colorScheme,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Row(
+          children: [
+            Icon(
+              icon,
+              color: colorScheme.primary,
+              size: 20,
+            ),
+            const SizedBox(width: 12),
+            Text(
+              label,
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+            ),
+          ],
+        ),
+        Text(
+          value,
+          style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                color: colorScheme.onSurface,
+                fontWeight: FontWeight.bold,
+              ),
+        ),
+      ],
     );
   }
 }

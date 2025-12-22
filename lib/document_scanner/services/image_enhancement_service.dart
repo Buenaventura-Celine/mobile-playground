@@ -13,11 +13,8 @@ class ImageEnhancementService {
       if (image == null) throw Exception('Could not decode image');
 
       // Apply enhancements sequentially
-      // Enhance contrast to make text more visible
-      image = img.contrast(image, contrast: 1.5);
-
-      // Apply slight blur reduction (denoise) with value normalization
-      image = img.normalize(image, min: 0, max: 255);
+      // Enhance contrast to make text more visible (preserves colors)
+      image = img.contrast(image, contrast: 1.3);
 
       // Save enhanced image
       final enhancedPath = _getSavePathForEnhanced(imagePath);

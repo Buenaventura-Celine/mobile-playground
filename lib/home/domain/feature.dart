@@ -33,11 +33,11 @@ final List<Feature> features = [
     route: '/${AppRoute.location.name}',
   ),
   Feature(
-    title: 'Camera',
-    description: 'Take photos and videos',
-    icon: Icons.camera_alt,
+    title: 'Document Scanner',
+    description: 'Scan documents and photos',
+    icon: Icons.document_scanner,
     color: Colors.green,
-    route: '/${AppRoute.camera.name}',
+    route: '/${AppRoute.documentScanner.name}',
   ),
   Feature(
     title: 'Sensors',

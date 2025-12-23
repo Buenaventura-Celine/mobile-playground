@@ -39,6 +39,20 @@ final List<Feature> features = [
     color: Colors.green,
     route: '/${AppRoute.documentScanner.name}',
   ),
+  Feature(
+    title: 'Authentication',
+    description: 'registration and login process',
+    icon: Icons.fingerprint,
+    color: Colors.indigo,
+    route: '/${AppRoute.authentication.name}',
+  ),
+  // Feature(
+  //   title: 'Sensors',
+  //   description: 'Device sensors data',
+  //   icon: Icons.sensors,
+  //   color: Colors.orange,
+  //   route: '/${AppRoute.sensors.name}',
+  // ),
   // Feature(
   //   title: 'Sensors',
   //   description: 'Device sensors data',

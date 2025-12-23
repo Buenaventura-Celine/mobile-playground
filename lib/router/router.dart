@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:mobile_playground/authentication/presentation/authentication_screen.dart';
 import 'package:mobile_playground/bluetooth/bluetooth_screen.dart';
 import 'package:mobile_playground/document_scanner/presentation/document_scanner_screen.dart';
 import 'package:mobile_playground/home/presentation/home_screen.dart';
@@ -16,6 +17,7 @@ enum AppRoute {
   sensors,
   bluetooth,
   storage,
+  authentication,
 }
 
 final GoRouter router = GoRouter(
@@ -60,6 +62,12 @@ final GoRouter router = GoRouter(
           path: AppRoute.storage.name,
           builder: (BuildContext context, GoRouterState state) {
             return const StorageScreen();
+          },
+        ),
+        GoRoute(
+          path: AppRoute.authentication.name,
+          builder: (BuildContext context, GoRouterState state) {
+            return const AuthenticationScreen();
           },
         ),
       ],

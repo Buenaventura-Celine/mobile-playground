@@ -46,6 +46,13 @@ final List<Feature> features = [
     color: Colors.indigo,
     route: '/${AppRoute.authentication.name}',
   ),
+  Feature(
+    title: 'File Upload',
+    description: 'Upload and manage files',
+    icon: Icons.upload,
+    color: Colors.purple,
+    route: '/${AppRoute.fileUpload.name}',
+  ),
   // Feature(
   //   title: 'Sensors',
   //   description: 'Device sensors data',

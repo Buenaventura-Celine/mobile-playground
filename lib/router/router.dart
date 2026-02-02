@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:mobile_playground/authentication/presentation/authentication_screen.dart';
 import 'package:mobile_playground/bluetooth/bluetooth_screen.dart';
 import 'package:mobile_playground/document_scanner/presentation/document_scanner_screen.dart';
+import 'package:mobile_playground/file_upload/presentation/file_upload_screen.dart';
 import 'package:mobile_playground/home/presentation/home_screen.dart';
 import 'package:mobile_playground/location/location_screen.dart';
 import 'package:mobile_playground/nfc_scanner/presentation/nfc_scanner_screen.dart';
@@ -18,6 +19,7 @@ enum AppRoute {
   bluetooth,
   storage,
   authentication,
+  fileUpload
 }
 
 final GoRouter router = GoRouter(
@@ -68,6 +70,12 @@ final GoRouter router = GoRouter(
           path: AppRoute.authentication.name,
           builder: (BuildContext context, GoRouterState state) {
             return const AuthenticationScreen();
+          },
+        ),
+        GoRoute(
+          path: AppRoute.fileUpload.name,
+          builder: (BuildContext context, GoRouterState state) {
+            return const FileUploadScreen();
           },
         ),
       ],

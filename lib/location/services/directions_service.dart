@@ -18,12 +18,13 @@ class DirectionsService {
         final data = json.decode(response.body);
 
         if (data['status'] == 'OK') {
-          final polylinePoints = PolylinePoints();
           final String encodedPolyline =
               data['routes'][0]['overview_polyline']['points'];
 
           final List<PointLatLng> result =
-              polylinePoints.decodePolyline(encodedPolyline);
+              PolylinePoints.decodePolyline(
+            encodedPolyline,
+          );
 
           return result
               .map((point) => LatLng(point.latitude, point.longitude))

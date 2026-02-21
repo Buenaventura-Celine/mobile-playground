@@ -202,7 +202,6 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
                                 color: Colors.transparent,
                                 child: InkWell(
                                   onTap: () {
-                                    // TODO: Show image preview
                                   },
                                   child: Padding(
                                     padding: const EdgeInsets.all(12),

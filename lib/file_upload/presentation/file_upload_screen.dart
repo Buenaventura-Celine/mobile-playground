@@ -1,27 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile_playground/file_upload/presentation/empty_file_list.dart';
 import 'package:mobile_playground/file_upload/presentation/file_grid.dart/file_grid.dart';
 import 'package:mobile_playground/file_upload/presentation/file_list/file_list.dart';
 import 'package:mobile_playground/file_upload/presentation/import_from_file_manager_button.dart';
 import 'package:mobile_playground/file_upload/presentation/import_from_gallery_button.dart';
 import 'package:mobile_playground/file_upload/presentation/take_photo_button.dart';
-import 'package:mobile_playground/file_upload/utils/getMockFiles.dart';
+import 'package:mobile_playground/file_upload/application/files_providers.dart';
 
-class FileUploadScreen extends StatefulWidget {
+class FileUploadScreen extends ConsumerStatefulWidget {
   const FileUploadScreen({super.key});
 
   @override
-  State<FileUploadScreen> createState() => _FileUploadScreenState();
+  ConsumerState<FileUploadScreen> createState() => _FileUploadScreenState();
 }
 
-class _FileUploadScreenState extends State<FileUploadScreen> {
+class _FileUploadScreenState extends ConsumerState<FileUploadScreen> {
   bool _isGridView = true;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final files = getMockFiles();
+    final files = ref.watch(filesProvider);
 
     return Scaffold(
       backgroundColor: colorScheme.surface,

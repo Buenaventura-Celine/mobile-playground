@@ -76,7 +76,6 @@ class FilePreviewBottomSheet extends StatelessWidget {
                     child: FilledButton.icon(
                       onPressed: () {
                         Navigator.pop(context);
-                        //TODO: remove file from list
                       },
                       icon: const Icon(Icons.delete),
                       label: const Text('Delete'),

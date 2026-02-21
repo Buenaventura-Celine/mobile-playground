@@ -193,7 +193,6 @@ class _CameraPreviewContentState extends State<_CameraPreviewContent> {
                             color: Colors.white,
                           ),
                           onPressed: () {
-                            // TODO: Navigate to gallery in Phase 5.3
                           },
                         ),
                       ),
